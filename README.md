@@ -1,5 +1,3 @@
-# ppg
+# Simoric
 
-Application that measures the PPG using the phone's camera and its flash.
-
-This is a proof of concept. Feel free to develop on it and use it :)
+Aplicación utilizada para medir el ritmo cardiaco utilizando la cámara y llevar un registro a los usuarios. 

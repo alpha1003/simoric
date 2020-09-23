@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: "login",
       routes: <String, WidgetBuilder>{
-        "login" : (BuildContext context) => LoginPage(),  
+        "login" : (BuildContext context) => MedicionPage(),  
       },
     );
   }
