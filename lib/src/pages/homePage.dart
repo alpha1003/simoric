@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simoric/src/pages/medicionPage.dart';
+import 'package:simoric/src/pages/loginPage.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,16 +12,27 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-     
 
     return Scaffold(
-        body: MedicionPage(),
+        body: _selectPage(_currentIndex),
         bottomNavigationBar: navigationBar(),
     );
   }
 
+  Widget _selectPage(int val){
+        switch(val){
+            case 0: return LoginPage(); 
+            case 1: return MedicionPage();     
+        }
+  }
+
   Widget navigationBar(){
       return BottomNavigationBar(
+          onTap: (i){
+              setState(() {
+                  _currentIndex = i; 
+              });
+          },
           items: [
              BottomNavigationBarItem(icon: Icon(Icons.home), title: Text("Inicio")),
              BottomNavigationBarItem(icon: Icon(Icons.fingerprint), title: Text("Medicion")),
@@ -29,4 +41,5 @@ class _HomePageState extends State<HomePage> {
           currentIndex: _currentIndex,
       );
   }
+
 }
