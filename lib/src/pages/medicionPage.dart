@@ -11,7 +11,8 @@ class MedicionPage extends StatefulWidget {
   }
 }
 
-class MedicionPageView extends State<MedicionPage> with SingleTickerProviderStateMixin {
+class MedicionPageView extends State<MedicionPage>
+    with SingleTickerProviderStateMixin {
   bool _toggled = false; // toggle button value
   List<SensorValue> _data = List<SensorValue>(); // array to store the values
   CameraController _controller;
@@ -53,6 +54,20 @@ class MedicionPageView extends State<MedicionPage> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.center,
+                  colors: [Colors.green[500], Colors.green[700]]),
+              boxShadow: [BoxShadow(blurRadius: 0.0)],
+              borderRadius: BorderRadius.vertical(
+                  bottom: new Radius.elliptical(
+                      MediaQuery.of(context).size.width, 40.0))),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
@@ -146,18 +161,18 @@ class MedicionPageView extends State<MedicionPage> with SingleTickerProviderStat
                 ),
               ),
             ),
-            //Expanded(
-            //  flex: 1,
-            //  child: Container(
-            //    margin: EdgeInsets.all(12),
-            //    decoration: BoxDecoration(
-            //        borderRadius: BorderRadius.all(
-            //          Radius.circular(18),
-            //        ),
-            //        color: Colors.black),
-            //    child: Chart(_data),
-            //  ),
-            //),
+            Expanded(
+              flex: 1,
+              child: Container(
+                margin: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(18),
+                    ),
+                    color: Colors.black),
+                child: Chart(_data),
+              ),
+            ),
           ],
         ),
       ),
