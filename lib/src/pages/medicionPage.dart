@@ -25,6 +25,7 @@ class MedicionPageView extends State<MedicionPage> with SingleTickerProviderStat
   double _avg; // store the average value during calculation
   DateTime _now; // store the now Datetime
   Timer _timer; // timer for image processing
+  List<int> _bpmList = List<int>(); 
 
   @override
   void initState() {
@@ -146,18 +147,18 @@ class MedicionPageView extends State<MedicionPage> with SingleTickerProviderStat
                 ),
               ),
             ),
-            //Expanded(
-            //  flex: 1,
-            //  child: Container(
-            //    margin: EdgeInsets.all(12),
-            //    decoration: BoxDecoration(
-            //        borderRadius: BorderRadius.all(
-            //          Radius.circular(18),
-            //        ),
-            //        color: Colors.black),
-            //    child: Chart(_data),
-            //  ),
-            //),
+            Expanded(
+              flex: 1,
+              child: Container(
+                margin: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(18),
+                    ),
+                    color: Colors.black),
+                child: Chart(_data),
+              ),
+            ),
           ],
         ),
       ),
@@ -239,14 +240,19 @@ class MedicionPageView extends State<MedicionPage> with SingleTickerProviderStat
       _data.removeAt(0);
     }
     setState(() {
-      _data.add(SensorValue(_now, _avg));
+      if(_avg>70 && _avg<90){
+          _data.add(SensorValue(_now, _avg));
+      }else{
+
+      }  
+      print("SENSOR: "+_data[30].value.toString()); 
+      //Los valores varian en un rango de 80 - 85 con el dedo en la cámara -- VERIFICAR 
     });
   }
 
   void _updateBPM() async {
     // Bear in mind that the method used to calculate the BPM is very rudimentar
     // feel free to improve it :)
-
     // Since this function doesn't need to be so "exact" regarding the time it executes,
     // I only used the a Future.delay to repeat it from time to time.
     // Ofc you can also use a Timer object to time the callback of this function
@@ -286,13 +292,29 @@ class MedicionPageView extends State<MedicionPage> with SingleTickerProviderStat
       if (_counter > 0) {
         _bpm = _bpm / _counter;
         print(_bpm);
+        
         setState(() {
           this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
+          _bpmList.add(_bpm.toInt());  
         });
       }
       await Future.delayed(Duration(
           milliseconds:
               1000 * _windowLen ~/ _fs)); // wait for a new set of _data values
+      
+      if(_bpmList.length>4){
+        int sum; 
+        _bpmList.forEach((element) {sum = sum + element;});
+       print("LISTA: "+_bpmList.toString());
+       setState(() {
+          _bpm = (sum/5); 
+          _untoggle();  
+      });
     }
+
+    }
+
+    
   }
+
 }
