@@ -325,11 +325,8 @@ class MedicionPageView extends State<MedicionPage>
           _bpm = (sum/5); 
           _untoggle();  
       });
-    }
-
-    }
-
-    
+     }
+    }  
   }
 
 }
