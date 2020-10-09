@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simoric/src/pages/constant.dart';
 
 class DiagnosticoPage extends StatefulWidget {
   @override
@@ -6,155 +7,160 @@ class DiagnosticoPage extends StatefulWidget {
 }
 
 class _DiagnosticoPageState extends State<DiagnosticoPage> {
-  Widget bodyData() => DataTable(
-      onSelectAll: (b) {},
-      sortColumnIndex: 0,
-      sortAscending: true,
-      columns: <DataColumn>[
-        DataColumn(
-          label: Text("Fecha"),
-          numeric: false,
-          onSort: (i, b) {
-            print("$i $b");
-            setState(() {
-              names.sort((a, b) => a.fecha.compareTo(b.fecha));
-            });
-          },
-          tooltip: "To display fecha",
-        ),
-        DataColumn(
-          label: Text("Hora"),
-          numeric: false,
-          onSort: (i, b) {
-            print("$i $b");
-            setState(() {
-              names.sort((a, b) => a.hora.compareTo(b.hora));
-            });
-          },
-          tooltip: "To display hora",
-        ),
-        DataColumn(
-          label: Text("bpm"),
-          numeric: false,
-          onSort: (i, b) {
-            print("$i $b");
-            setState(() {
-              names.sort((a, b) => a.bpm.compareTo(b.bpm));
-            });
-          },
-          tooltip: "To display bpm",
-        ),
-        DataColumn(
-          label: Text("Detalles"),
-          tooltip: "To display delete",
-        ),
-      ],
-      rows: names
-          .map(
-            (name) => DataRow(
-              cells: [
-                DataCell(
-                  Text(name.fecha),
-                  showEditIcon: false,
-                  placeholder: false,
-                ),
-                DataCell(
-                  Text(name.hora),
-                  showEditIcon: false,
-                  placeholder: false,
-                ),
-                DataCell(
-                  Text(name.bpm),
-                  showEditIcon: false,
-                  placeholder: false,
-                ),
-                DataCell(IconButton(
-                    icon: Icon(
-                      Icons.open_in_browser,
-                      color: Colors.blue,
-                    ),
-                    onPressed: null)),
-              ],
-            ),
-          )
-          .toList());
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Diagnostico"),
-          flexibleSpace: Container(
+          appBar: buildAppbar(),
+          body: Body(),
+          floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              child: Icon(Icons.search),
+              backgroundColor: Colors.blueAccent)),
+    );
+  }
+
+  AppBar buildAppbar() {
+    return AppBar(
+      title: const Text("Diagnosticos"),
+      elevation: 0.0,
+    );
+  }
+}
+
+class Tabla extends StatelessWidget {
+  const Tabla({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+        child: DataTable(
+            onSelectAll: (b) {},
+            sortColumnIndex: 0,
+            sortAscending: true,
+            columns: <DataColumn>[
+              DataColumn(
+                label: Text("Fecha"),
+                tooltip: "To display first name of the Name",
+              ),
+              DataColumn(
+                label: Text("Hora"),
+                numeric: false,
+                tooltip: "To display number cell",
+              ),
+              DataColumn(
+                label: Text("Bpm"),
+                numeric: false,
+                tooltip: "To display number cell",
+              ),
+              DataColumn(
+                label: Text("Detalles"),
+                tooltip: "To display delete",
+              ),
+            ],
+            rows: names
+                .map(
+                  (name) => DataRow(
+                    cells: [
+                      DataCell(
+                        Container(
+                          width: 100,
+                          child: Text(name.fecha),
+                        ),
+                      ),
+                      DataCell(
+                        Container(width: 100, child: Text(name.hora)),
+                      ),
+                      DataCell(
+                        Container(width: 100, child: Text(name.bpm)),
+                      ),
+                      DataCell(
+                        Container(
+                            width: 100,
+                            child: IconButton(
+                                icon: Icon(
+                                  Icons.open_in_browser,
+                                  color: Colors.blue,
+                                ),
+                                onPressed: null)),
+                      ),
+                    ],
+                  ),
+                )
+                .toList()));
+  }
+}
+
+class Body extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // It will provie us total height  and width of our screen
+    Size size = MediaQuery.of(context).size * 1.5;
+    // it enable scrolling on small device
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Header(size: size),
+          Tabla(),
+        ],
+      ),
+    );
+  }
+}
+
+class Header extends StatelessWidget {
+  const Header({
+    Key key,
+    @required this.size,
+  }) : super(key: key);
+
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: kDefaultPadding * 2.5),
+      // It will cover 20% of our total height
+      height: size.height / 6,
+      child: Stack(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(
+              left: kDefaultPadding,
+              right: kDefaultPadding,
+              bottom: kDefaultPadding,
+            ),
+            height: size.height,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.center,
-                  colors: [Colors.green[400], Colors.green[600]]),
-            ),
-          ),
-          elevation: 0.0,
-        ),
-        body: SingleChildScrollView(
-          child: Center(
-            child: Container(
-              height: MediaQuery.of(context).size.height * 1.5,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.center,
-                    colors: [Colors.green[400], Colors.green[600]]),
+              color: kPrimaryColor,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(36),
+                bottomRight: Radius.circular(36),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(left: 20.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 150,
-                            child: Image.asset("assets/mascota.png"),
-                          ),
-                          Container(
-                              padding: const EdgeInsets.all(10.0),
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Colors.white, width: 2.0),
-                                  borderRadius: BorderRadius.circular(20.0)),
-                              child: Text(
-                                  'Aquí puedes ver tus \ndiagnosticos realizados \nen los ultimos días',
-                                  style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20.0))),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(55.0))),
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(30.0),
-                            child: Container(
-                              child: bodyData(),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0),
+              child: Row(
+                children: <Widget>[
+                  SizedBox(
+                    height: 150,
+                    child: Image.asset("assets/mascota.png"),
+                  ),
+                  Text(
+                    'Agrega o modifica un \ncontacto al que desees \nnotificar en caso de alerta.',
+                    style: Theme.of(context).textTheme.headline5.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

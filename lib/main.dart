@@ -1,3 +1,4 @@
+import 'package:simoric/src/pages/constant.dart';
 import 'package:simoric/src/pages/homePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       title: 'Simoric',
       theme: ThemeData(
         brightness: Brightness.light,
-        primaryColor: Colors.green,
+        primaryColor: kPrimaryColor,
       ),
       initialRoute: "login",
       routes: <String, WidgetBuilder>{
