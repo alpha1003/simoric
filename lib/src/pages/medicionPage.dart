@@ -5,6 +5,7 @@ import 'package:wakelock/wakelock.dart';
 import '../../chart.dart';
 
 class MedicionPage extends StatefulWidget {
+  static final routeName = "medicionPage"; 
   @override
   MedicionPageView createState() {
     return MedicionPageView();
