@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:simoric/src/pages/constant.dart';
 import 'package:simoric/src/pages/forms/formContact.dart';
 
+import 'mainDrawer.dart';
+
 class ContactoPage extends StatefulWidget {
+  static final String routeName = "contactoPage";
   @override
   _ContactoPageState createState() => _ContactoPageState();
 }
@@ -14,6 +17,9 @@ class _ContactoPageState extends State<ContactoPage> {
       child: Scaffold(
           appBar: buildAppbar(),
           body: Body(),
+          drawer: Drawer(
+            child: MainDrawer(),
+          ),
           floatingActionButton: FloatingActionButton(
               onPressed: () {
                 Navigator.push(
@@ -30,6 +36,7 @@ class _ContactoPageState extends State<ContactoPage> {
     return AppBar(
       title: const Text("Contactos"),
       elevation: 0.0,
+      centerTitle: true,
     );
   }
 }

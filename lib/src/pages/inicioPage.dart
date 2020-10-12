@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:simoric/src/pages/constant.dart';
 
+import 'mainDrawer.dart';
+
 class InicioPage extends StatefulWidget {
   @override
   _InicioPageState createState() => _InicioPageState();
@@ -12,6 +14,9 @@ class _InicioPageState extends State<InicioPage> {
     return Scaffold(
       appBar: buildAppBar(),
       body: Body(),
+      drawer: Drawer(
+        child: MainDrawer(),
+      ),
     );
   }
 }

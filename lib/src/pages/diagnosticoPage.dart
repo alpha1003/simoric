@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:simoric/src/pages/constant.dart';
 import 'package:simoric/src/pages/medicionPage.dart';
 
+import 'mainDrawer.dart';
+
 class DiagnosticoPage extends StatefulWidget {
   @override
   _DiagnosticoPageState createState() => _DiagnosticoPageState();
@@ -14,12 +16,14 @@ class _DiagnosticoPageState extends State<DiagnosticoPage> {
       child: Scaffold(
           appBar: buildAppbar(),
           body: Body(),
+          drawer: Drawer(
+            child: MainDrawer(),
+          ),
           floatingActionButton: FloatingActionButton(
-              onPressed: () => Navigator.pushNamed(context, MedicionPage.routeName),
+              onPressed: () =>
+                  Navigator.pushNamed(context, MedicionPage.routeName),
               child: Icon(Icons.local_hospital),
-              backgroundColor: Colors.blueAccent
-        )
-      ),
+              backgroundColor: Colors.blueAccent)),
     );
   }
 
@@ -49,7 +53,7 @@ class Tabla extends StatelessWidget {
                 tooltip: "To display first name of the Name",
               ),
               DataColumn(
-                label: Text("Hora"),
+                label: Text("Frecuencia"),
                 numeric: false,
                 tooltip: "To display number cell",
               ),
@@ -69,19 +73,19 @@ class Tabla extends StatelessWidget {
                     cells: [
                       DataCell(
                         Container(
-                          width: 100,
+                          width: 80,
                           child: Text(name.fecha),
                         ),
                       ),
                       DataCell(
-                        Container(width: 100, child: Text(name.hora)),
+                        Container(width: 50, child: Text(name.frecuencia)),
                       ),
                       DataCell(
-                        Container(width: 100, child: Text(name.bpm)),
+                        Container(width: 50, child: Text(name.bpm)),
                       ),
                       DataCell(
                         Container(
-                            width: 100,
+                            width: 50,
                             child: IconButton(
                                 icon: Icon(
                                   Icons.open_in_browser,
@@ -171,12 +175,12 @@ class Header extends StatelessWidget {
 
 class Name {
   String fecha;
-  String hora;
+  String frecuencia;
   String bpm;
 
-  Name({this.fecha, this.hora, this.bpm});
+  Name({this.fecha, this.frecuencia, this.bpm});
 }
 
 var names = <Name>[
-  Name(fecha: "3/10/2020", hora: "16:00", bpm: "82"),
+  Name(fecha: "3/10/2020", frecuencia: "Normal", bpm: "82"),
 ];

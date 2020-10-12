@@ -4,9 +4,8 @@ import 'package:simoric/src/pages/diagnosticoPage.dart';
 import 'package:simoric/src/pages/inicioPage.dart';
 import 'package:simoric/src/pages/medicionPage.dart';
 
-
 class HomePage extends StatefulWidget {
-  static final String routeName = "homePage"; 
+  static final String routeName = "homePage";
   @override
   _HomePageState createState() => _HomePageState();
 }
