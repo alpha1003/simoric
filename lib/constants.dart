@@ -1,13 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:simoric/size_config.dart';
 
-const kPrimaryColor = Color(0xFF25FA3F);
+const kPrimaryColor = Color(0xFF0C9869);
 const kPrimaryLightColor = Color(0xFFFFECDF);
 const kPrimaryGradientColor = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
-  colors: [Color(0xFF25FA3F), Color(0xFF00A300)],
+  colors: [Color(0xFF25FA3F), Color(0xFF0C9869)],
 );
 const kSecondaryColor = Color(0xFF979797);
 const kTextColor = Color(0xFF757575);

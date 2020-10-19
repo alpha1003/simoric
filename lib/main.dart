@@ -9,33 +9,28 @@ import 'package:simoric/src/pages/login_page.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/screens/splash/splash_screen.dart';
 
-void main() async { 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = new PreferenciasUsuario();
+  await prefs.initPrefs();
 
-      WidgetsFlutterBinding.ensureInitialized();
-      final prefs = new PreferenciasUsuario();
-      await prefs.initPrefs();
-
-      runApp(MyApp());
-  }
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-
-
-
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
+    final prefs = new PreferenciasUsuario();
 
-    final prefs = new PreferenciasUsuario(); 
-
-    if(prefs.token != ""){
-        print("TOKEN: ${prefs.token}");
-        prefs.ultimaPagina  =HomePage.routeName; 
-    }else{
-       prefs.ultimaPagina = LoginPage.routeName; 
+    if (prefs.token != "") {
+      print("TOKEN: ${prefs.token}");
+      prefs.ultimaPagina = HomePage.routeName;
+    } else {
+      prefs.ultimaPagina = LoginPage.routeName;
     }
 
     return Provider(
-        child: MaterialApp(
+      child: MaterialApp(
         builder: (context, widget) => ResponsiveWrapper.builder(
           BouncingScrollWrapper.builder(context, widget),
           maxWidth: 1200,
