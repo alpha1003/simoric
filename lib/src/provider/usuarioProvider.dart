@@ -7,7 +7,7 @@ class UsuarioProvider {
 String _firebaseToken = "AIzaSyAQpBiX-NdJIKzAg2wci6O3yFEcZ9Kpkw8"; 
 final _prefs = new PreferenciasUsuario();
   
-   Future<Map<String,dynamic>> nuevoUsuario(String mail, String passwd) async {
+  Future<Map<String,dynamic>> nuevoUsuario(String mail, String passwd) async {
       final authData = {
         "email" : mail,
         "password" : passwd,
@@ -24,7 +24,7 @@ final _prefs = new PreferenciasUsuario();
       print(decodedData);
 
       if(decodedData.containsKey("idToken")){
-        //TODO salvar token en storge
+        _prefs.token = decodedData["idToken"]; 
         return {"ok" : true, "token" : decodedData["idToken"] };
       }else{
           return {"ok" : false, "mensaje" : decodedData["error"]["message"] };
