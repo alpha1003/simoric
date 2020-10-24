@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simoric/src/pages/homePage.dart';
 import 'package:simoric/src/pages/registroPage.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/utils/utils.dart' as utils;
 import 'package:simoric/src/bloc/login_bloc.dart';
 import 'package:simoric/src/bloc/provider.dart';
@@ -10,6 +11,7 @@ class LoginPage extends StatelessWidget {
 
   static final String routeName = "LoginPage"; 
   final UsuarioProvider usuarioProvider = new UsuarioProvider();
+  final _prefs = PreferenciasUsuario(); 
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +164,7 @@ class LoginPage extends StatelessWidget {
           elevation: 0.0,
           color: Colors.lightGreen,
           textColor: Colors.white,
-          onPressed: snapshot.hasData ? ()=> _login(bloc, context) : null
+          onPressed: snapshot.hasData ? ()=> _login2(bloc, context) : null
         );
       },
     );
@@ -172,14 +174,23 @@ class LoginPage extends StatelessWidget {
 
     Map info = await usuarioProvider.login(bloc.email, bloc.password); 
 
-    if( info["ok"]){
-        Navigator.pushReplacementNamed(context, 'home');
+    if( info!=null){
+        //_prefs.nombre = 
+        Navigator.pushReplacementNamed(context, HomePage.routeName);
     }else{
-
         utils.mostrarAlerta(context, info["mensaje"]);
     }
-    
+  }
 
+  _login2(LoginBloc bloc, BuildContext context) async {
+
+    final info = await usuarioProvider.login2(bloc.email, bloc.password); 
+     print(info.toString()); 
+    if( info!=null ){ 
+        Navigator.pushReplacementNamed(context, HomePage.routeName);
+    }else{
+        utils.mostrarAlerta(context, "adas");
+    }
   }
 
 
@@ -193,8 +204,8 @@ class LoginPage extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: <Color> [
-            Color.fromRGBO(42, 173, 16, 1.0),
-            Color.fromRGBO(45, 219, 11, 1.0)
+             Color.fromRGBO(162,243,26,1),
+             Color.fromRGBO(25,217,50,1)
           ]
         )
       ),

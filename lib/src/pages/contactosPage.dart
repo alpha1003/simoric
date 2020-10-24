@@ -1,22 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
+import 'package:simoric/src/models/contactModel.dart';
 import 'package:simoric/src/pages/constant.dart';
 import 'package:simoric/src/pages/forms/formContact.dart';
+import 'package:simoric/src/pages/widgets/headerWidget.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
+import 'package:simoric/src/provider/contactosProvider.dart';
 
-import 'mainDrawer.dart';
+import 'widgets/mainDrawer.dart';
 
 class ContactoPage extends StatefulWidget {
   static final String routeName = "contactoPage";
+ 
   @override
   _ContactoPageState createState() => _ContactoPageState();
 }
 
-class _ContactoPageState extends State<ContactoPage> {
+class _ContactoPageState extends State<ContactoPage> { 
+ 
+ Size size; 
+ LoginBloc bloc = LoginBloc(); 
+ ContactoProvider _contactoProvider = ContactoProvider();
+ PreferenciasUsuario _prefs = PreferenciasUsuario();  
+
+
   @override
   Widget build(BuildContext context) {
+   size = MediaQuery.of(context).size * 1.5; 
+   bloc.cargarContactos(); 
+  
     return SafeArea(
       child: Scaffold(
-          appBar: buildAppbar(),
-          body: Body(),
+          appBar: AppBar(
+             elevation: 2.0,
+             title: Text("Contactos"), 
+          ),
+          body: _body(bloc),
           drawer: Drawer(
             child: MainDrawer(),
           ),
@@ -28,162 +47,65 @@ class _ContactoPageState extends State<ContactoPage> {
                         builder: (BuildContext context) => FormContacto()));
               },
               child: Icon(Icons.add),
-              backgroundColor: Colors.blueAccent)),
+              backgroundColor: Colors.blueAccent))
     );
-  }
+  } 
 
-  AppBar buildAppbar() {
-    return AppBar(
-      title: const Text("Contactos"),
-      elevation: 0.0,
-      centerTitle: true,
-    );
-  }
-}
-
-class Tabla extends StatelessWidget {
-  const Tabla({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: DataTable(
-            onSelectAll: (b) {},
-            sortColumnIndex: 0,
-            sortAscending: true,
-            columns: <DataColumn>[
-              DataColumn(
-                label: Text("Nombre"),
-                tooltip: "To display first name of the Name",
-              ),
-              DataColumn(
-                label: Text("Celular"),
-                numeric: false,
-                tooltip: "To display number cell",
-              ),
-              DataColumn(
-                label: Text("Detalles"),
-                tooltip: "To display delete",
-              ),
-            ],
-            rows: names
-                .map(
-                  (name) => DataRow(
-                    cells: [
-                      DataCell(
-                        Container(
-                          width: 100,
-                          child: Text(name.firstName),
-                        ),
-                      ),
-                      DataCell(
-                        Container(
-                          width: 100,
-                          child: Text(name.telephone.toString()),
-                        ),
-                      ),
-                      DataCell(
-                        Container(
-                            width: 100,
-                            child: IconButton(
-                                icon: Icon(
-                                  Icons.open_in_browser,
-                                  color: Colors.blue,
-                                ),
-                                onPressed: null)),
-                      ),
-                    ],
-                  ),
-                )
-                .toList()));
-  }
-}
-
-class Body extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // It will provie us total height  and width of our screen
-    Size size = MediaQuery.of(context).size * 1.5;
-    // it enable scrolling on small device
+  Widget _body(LoginBloc bloc){
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Header(size: size),
-          Tabla(),
+          HeaderWidget(size: size, text: "Contactos \n \n Gestiona aquí tus",),
+          _crearListado(bloc),
+          SizedBox(height: 20.0,),
         ],
       ),
     );
   }
-}
 
-class Header extends StatelessWidget {
-  const Header({
-    Key key,
-    @required this.size,
-  }) : super(key: key);
+  Widget _crearListado(LoginBloc bloc){ 
+     return  StreamBuilder(
+          stream: bloc.listaStream, 
+          builder: (BuildContext context, AsyncSnapshot<List<ContactModel>> snapshot){
+              if ( snapshot.hasData ) {      
+                final contactos = snapshot.data;
+                return ListView.builder(
+                   scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: contactos.length,
+                  itemBuilder: (context, i) => _crearItem(context, contactos[i] ),
+                );
+              } else {
+                return Center( child: CircularProgressIndicator());
+              }
+          },
+      );
+  } 
 
-  final Size size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: kDefaultPadding * 2.5),
-      // It will cover 20% of our total height
-      height: size.height / 6,
-      child: Stack(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(
-              left: kDefaultPadding,
-              right: kDefaultPadding,
-              bottom: kDefaultPadding,
-            ),
-            height: size.height,
-            decoration: BoxDecoration(
-              color: kPrimaryColor,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(36),
-                bottomRight: Radius.circular(36),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20.0),
-              child: Row(
-                children: <Widget>[
-                  SizedBox(
-                    height: 150,
-                    child: Image.asset("assets/mascota.png"),
-                  ),
-                  Text(
-                    'Agrega o modifica un \ncontacto al que desees \nnotificar en caso de alerta.',
-                    style: Theme.of(context).textTheme.headline5.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+  Widget _crearItem(BuildContext context, ContactModel contact){
+    return Dismissible(
+      key: UniqueKey(),
+      background: Container(
+        color: Colors.red,
       ),
+      onDismissed: ( direccion ){
+        _contactoProvider.borrarContacto(_prefs.idUser,contact.id);
+      },
+      child: Card(
+        child: Column(
+          children: <Widget>[  
+            ListTile(
+              title: Text('${contact.name } - ${ contact.lastName }'),
+              subtitle: Text("Celular: ${contact.phoneNumber} \n"
+                             "Email: ${contact.email}"),
+              //onTap: () => Navigator.pushNamed(context, ProductoPage.routeName, arguments: producto ),
+            ),
+          ],
+        ),
+      )
     );
   }
+
 }
 
-class Name {
-  String firstName;
-  String lastName;
-  int telephone;
-
-  Name({this.firstName, this.lastName, this.telephone});
-}
-
-var names = <Name>[
-  Name(firstName: "Jose", lastName: "Camargo", telephone: 3215149242),
-  Name(firstName: "Martin", lastName: "Burgos", telephone: 3215149242),
-  Name(firstName: "Rohan", lastName: "Singh", telephone: 3215149242),
-];

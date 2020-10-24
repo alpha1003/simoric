@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:simoric/src/bloc/login_bloc.dart';
 import 'package:simoric/src/bloc/provider.dart';
+import 'package:simoric/src/models/usuarioModel.dart';
 import 'package:simoric/src/pages/homePage.dart';
 import 'package:simoric/src/pages/login_page.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/provider/usuarioProvider.dart';
 import 'package:simoric/src/utils/utils.dart' as utils;
 
@@ -10,6 +12,7 @@ import 'package:simoric/src/utils/utils.dart' as utils;
 class RegistroPage extends StatefulWidget {
 
   static final String routeName = "RegistroPage"; 
+  
 
   @override
   _RegistroPageState createState() => _RegistroPageState();
@@ -17,6 +20,9 @@ class RegistroPage extends StatefulWidget {
 
 class _RegistroPageState extends State<RegistroPage> {
   final usuarioProvider = new UsuarioProvider(); 
+  final formkey = GlobalKey<FormState>(); 
+  UsuarioModel user = UsuarioModel(); 
+  final _prefs = PreferenciasUsuario(); 
 
   @override
   void initState() { 
@@ -67,22 +73,27 @@ class _RegistroPageState extends State<RegistroPage> {
                 )
               ]
             ),
-            child: Column(
-              children: <Widget>[
-                Text("Crear cuenta", style: TextStyle(fontSize: 20.0)),
-                SizedBox( height: 60.0 ),
-                _crearEmail( bloc ),
-                SizedBox( height: 30.0 ),
-                _crearPassword( bloc ),
-                SizedBox( height: 30.0 ),
-                _crearNombre(),
-                 SizedBox( height: 30.0 ),
-                _crearApellido(),
-                 SizedBox( height: 30.0 ),
-                _crearEdad(),
+            child: Form(
+                key: formkey,   
+                child: Column(
+                children: <Widget>[
+                  Text("Crear cuenta", style: TextStyle(fontSize: 20.0)),
+                  SizedBox( height: 60.0 ),
+                  _crearEmail( bloc ),
                   SizedBox( height: 30.0 ),
-                _crearBoton( bloc )
-              ],
+                  _crearPassword( bloc ),
+                  SizedBox( height: 30.0 ),
+                  _crearNombre(),
+                   SizedBox( height: 30.0 ),
+                  _crearApellido(),
+                   SizedBox( height: 30.0 ),
+                  _crearEdad(),
+                    SizedBox( height: 30.0 ),
+                    _crearPhone(),
+                    SizedBox( height: 30.0 ),
+                  _crearBoton( bloc )
+                ],
+              ),
             ),
           ),
 
@@ -107,16 +118,16 @@ class _RegistroPageState extends State<RegistroPage> {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
 
-        child: TextField(
+        child: TextFormField(
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             icon: Icon( Icons.alternate_email, color: Colors.lightGreen ),
             hintText: 'ejemplo@correo.com',
             labelText: 'Correo electrónico',
-            counterText: snapshot.data,
             errorText: snapshot.error
           ),
           onChanged: bloc.changeEmail,
+          onSaved: (val) => user.email = val,
         ),
 
       );
@@ -136,15 +147,15 @@ class _RegistroPageState extends State<RegistroPage> {
         
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: TextField(
+          child: TextFormField(
             obscureText: true,
             decoration: InputDecoration(
               icon: Icon( Icons.lock_outline, color: Colors.lightGreen ),
               labelText: 'Contraseña',
-              counterText: snapshot.data,
               errorText: snapshot.error
             ),
             onChanged: bloc.changePassword,
+            
           ),
 
         );
@@ -158,30 +169,30 @@ class _RegistroPageState extends State<RegistroPage> {
   Widget _crearNombre(){
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
-        child: TextField(
+        child: TextFormField(
           keyboardType: TextInputType.name,
           decoration: InputDecoration(
             icon: Icon( Icons.perm_contact_calendar, color: Colors.lightGreen ),
             hintText: 'Tu nombre',
             labelText: 'Nombre',
           ),
-          
+          onSaved: (val) => user.name = val,
         ),
 
       );
   }
 
- Widget _crearApellido(){
+  Widget _crearApellido(){
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
-        child: TextField(
+        child: TextFormField(
           keyboardType: TextInputType.name,
           decoration: InputDecoration(
             icon: Icon( Icons.perm_contact_calendar, color: Colors.lightGreen ),
             hintText: 'Tu apellido',
             labelText: 'Apellido',
           ),
-          
+          onSaved: (val)=>user.lastname=val,
         ),
 
       );
@@ -190,18 +201,40 @@ class _RegistroPageState extends State<RegistroPage> {
   Widget _crearEdad(){
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 20.0),
-        child: TextField(
+        child: TextFormField(
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             icon: Icon( Icons.perm_contact_calendar, color: Colors.lightGreen ),
             hintText: 'Tu edad',
             labelText: 'Edad',
           ),
-          
+          validator: (value){
+             return(utils.isNumeric(value) )?null: "No es válido"; 
+          },
+          onSaved: (val) => user.age = int.parse(val),
         ),
 
       );
-  }   
+  }  
+
+  Widget _crearPhone(){
+    return Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        child: TextFormField(
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            icon: Icon( Icons.phone, color: Colors.lightGreen ),
+            hintText: 'Número de celular',
+            labelText: 'Número de celular',
+          ),
+          validator: (value){
+             return(utils.isNumeric(value) || value.length != 10)?null: "No es un valor numérico"; 
+          },
+          onSaved: (val) => user.phoneNumber = int.parse(val),
+        ),
+
+      );
+  }    
 
   Widget _crearBoton( LoginBloc bloc) {
 
@@ -224,7 +257,7 @@ class _RegistroPageState extends State<RegistroPage> {
           elevation: 0.0,
           color: Colors.deepPurple,
           textColor: Colors.white,
-          onPressed: snapshot.hasData ? ()=> _registrer(bloc, context) : null
+          onPressed: snapshot.hasData ? ()=> _registro2(context,bloc) : null
         );
       },
     );
@@ -232,15 +265,43 @@ class _RegistroPageState extends State<RegistroPage> {
 
   _registrer(LoginBloc bloc, BuildContext context) async {
 
-    Map info = await usuarioProvider.nuevoUsuario(bloc.email, bloc.password); 
-
-    if( info["ok"]){
-        Navigator.pushReplacementNamed(context, HomePage.routeName);
+    if(!formkey.currentState.validate()){
+        return;
     }else{
+        formkey.currentState.save(); 
+        Map info = await usuarioProvider.nuevoUsuario(bloc.email, bloc.password); 
 
-        utils.mostrarAlerta(context, info["mensaje"]);
+        if( info["ok"]){
+            print(user.name);
+            Map res = await usuarioProvider.crearUsuarioDB(user);
+            _prefs.nombre = user.name; 
+            Navigator.pushReplacementNamed(context, HomePage.routeName);
+        }else{
+            utils.mostrarAlerta(context, info["mensaje"]);
+        }
+
     }
+
+    
   }
+
+  _registro2(BuildContext context, LoginBloc bloc) async {
+        if(!formkey.currentState.validate()){
+            return;
+        }else{
+            formkey.currentState.save(); 
+            final res = await usuarioProvider.nuevoUsuario2(bloc.email, bloc.password, user);
+            if(res.credential.token != null){ 
+               SnackBar snb = SnackBar(
+                   content: Text("El usuario ha sido creado con éxito"),
+                   duration: Duration(milliseconds: 2000),
+               );
+               Scaffold.of(context).showSnackBar(snb);
+               Future.delayed(Duration(seconds: 1)); 
+               Navigator.pushNamed(context, HomePage.routeName); 
+            } 
+        }
+   }
 
   Widget _crearFondo(BuildContext context) {
 
@@ -252,8 +313,8 @@ class _RegistroPageState extends State<RegistroPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: <Color> [
-            Color.fromRGBO(42, 173, 16, 1.0),
-            Color.fromRGBO(45, 219, 11, 1.0)
+             Color.fromRGBO(162,243,26,1),
+             Color.fromRGBO(25,217,50,1)
           ]
         )
       ),

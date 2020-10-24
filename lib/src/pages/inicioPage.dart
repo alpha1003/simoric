@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:simoric/src/pages/constant.dart';
+import 'package:simoric/src/pages/widgets/headerWidget.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 
-import 'mainDrawer.dart';
+import 'widgets/mainDrawer.dart';
 
 class InicioPage extends StatefulWidget {
   @override
@@ -9,6 +11,9 @@ class InicioPage extends StatefulWidget {
 }
 
 class _InicioPageState extends State<InicioPage> {
+
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +32,9 @@ AppBar buildAppBar() {
   );
 }
 
-class Body extends StatelessWidget {
+class Body extends StatelessWidget { 
+  PreferenciasUsuario _prefs = PreferenciasUsuario(); 
+   
   @override
   Widget build(BuildContext context) {
     // It will provie us total height  and width of our screen
@@ -37,67 +44,12 @@ class Body extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Header(size: size),
+          HeaderWidget(size: size, text: "Bienvenido ${_prefs.nombre}",),
           TituloConBoton(title: "Recomendaciones", press: () {}),
           Recomendados(),
           TituloConBoton(title: "¿Como te sientes hoy?", press: () {}),
           Emojis(),
           SizedBox(height: kDefaultPadding),
-        ],
-      ),
-    );
-  }
-}
-
-class Header extends StatelessWidget {
-  const Header({
-    Key key,
-    @required this.size,
-  }) : super(key: key);
-
-  final Size size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: kDefaultPadding * 2.5),
-      // It will cover 20% of our total height
-      height: size.height / 6,
-      child: Stack(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(
-              left: kDefaultPadding,
-              right: kDefaultPadding,
-              bottom: kDefaultPadding,
-            ),
-            height: size.height,
-            decoration: BoxDecoration(
-              color: kPrimaryColor,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(36),
-                bottomRight: Radius.circular(36),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20.0),
-              child: Row(
-                children: <Widget>[
-                  SizedBox(
-                    height: 150,
-                    child: Image.asset("assets/mascota.png"),
-                  ),
-                  Text(
-                    'Me alegra verte aquí!.',
-                    style: Theme.of(context).textTheme.headline5.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );

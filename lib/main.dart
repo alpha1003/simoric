@@ -1,33 +1,67 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:simoric/routes.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
 import 'package:simoric/src/bloc/provider.dart';
 import 'package:simoric/src/pages/constant.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:simoric/src/pages/homePage.dart';
 import 'package:simoric/src/pages/login_page.dart';
+import 'package:simoric/src/pages/recomendacionesPage.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/screens/splash/splash_screen.dart';
 
+
+
+
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = new PreferenciasUsuario();
-  await prefs.initPrefs();
+  final _prefs = new PreferenciasUsuario();
+  await _prefs.initPrefs();
+  await Firebase.initializeApp(); 
+  final _auth = FirebaseAuth.instance; 
+
+  
+  _auth.authStateChanges()
+  .listen((User user) {
+    if (user == null) {
+      print('User is currently signed out!');
+      _prefs.inicioPage = SplashScreen.routeName; 
+    } else {
+      print('User is signed in!');
+      print(_auth.currentUser); 
+      _prefs.inicioPage = HomePage.routeName;
+    }
+  });
 
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
   @override
   Widget build(BuildContext context) {
-    final prefs = new PreferenciasUsuario();
+    final _prefs = new PreferenciasUsuario();
+   
 
-    if (prefs.token != "") {
-      print("TOKEN: ${prefs.token}");
-      prefs.ultimaPagina = HomePage.routeName;
+    if (_prefs.token != "") {
+      print("TOKEN: ${_prefs.token}");
+      _prefs.ultimaPagina = HomePage.routeName;
     } else {
-      prefs.ultimaPagina = LoginPage.routeName;
-    }
+      _prefs.ultimaPagina = LoginPage.routeName;
+    } 
+
+
+
 
     return Provider(
       child: MaterialApp(
@@ -50,7 +84,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
           primaryColor: kPrimaryColor,
         ),
-        initialRoute: SplashScreen.routeName,
+        initialRoute:_prefs.inicioPage,
         routes: routes,
       ),
     );

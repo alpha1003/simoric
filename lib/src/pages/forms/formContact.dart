@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:simoric/src/models/contactModel.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
+import 'package:simoric/src/provider/contactosProvider.dart';
+import 'package:simoric/src/utils/utils.dart' as utils;
 
 class FormContacto extends StatefulWidget {
   @override
@@ -6,6 +10,12 @@ class FormContacto extends StatefulWidget {
 }
 
 class _FormContactoState extends State<FormContacto> {
+
+  final formKey = GlobalKey<FormState>(); 
+  ContactModel contact = new ContactModel(); 
+  ContactoProvider contactoProvider = ContactoProvider(); 
+  PreferenciasUsuario _prefs = PreferenciasUsuario(); 
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -16,7 +26,12 @@ class _FormContactoState extends State<FormContacto> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                       begin: Alignment.center,
-                      colors: [Colors.green[400], Colors.green[600]]),
+                      colors: [
+                              
+                            Color.fromRGBO(162,243,26,1),
+                             Color.fromRGBO(25,217,50,1)
+                        ]
+                  ),
                 ),
               ),
               elevation: 0.0,
@@ -28,7 +43,9 @@ class _FormContactoState extends State<FormContacto> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                           begin: Alignment.center,
-                          colors: [Colors.green[400], Colors.green[600]]),
+                          colors: [Color.fromRGBO(162,243,26,1),
+                                  Color.fromRGBO(25,217,50,1)]
+                        ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -72,19 +89,16 @@ class _FormContactoState extends State<FormContacto> {
                                 horizontal: 15.0,
                               ),
                               child: Form(
+                                key: formKey,
                                 child: Column(
                                   children: <Widget>[
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
-                                        validator: (String value) {
-                                          if (value.isEmpty) {
-                                            return "Se debe ingresar un nombre";
-                                          }
-                                          return null;
-                                        },
+                                        onSaved:(value) => contact.name = value, 
+                                        validator: (String value) => (value.isEmpty)?"Ingrese un nombre":null,
                                         decoration: InputDecoration(
-                                          labelText: "Primer nombre",
+                                          labelText: "Nombre",
                                           border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(20.0)),
@@ -94,14 +108,10 @@ class _FormContactoState extends State<FormContacto> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
-                                        validator: (String value) {
-                                          if (value.isEmpty) {
-                                            return "Se debe ingresar el apellido";
-                                          }
-                                          return null;
-                                        },
+                                        onSaved: (value) => contact.lastName = value,
+                                        validator: (String value) => (value.isEmpty)?"Ingrese un apellido":null,
                                         decoration: InputDecoration(
-                                          labelText: "Apellidos",
+                                          labelText: "Apellido",
                                           border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(20.0)),
@@ -111,12 +121,8 @@ class _FormContactoState extends State<FormContacto> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
-                                        validator: (String value) {
-                                          if (value.isEmpty) {
-                                            return "Se debe ingresar un correo";
-                                          }
-                                          return null;
-                                        },
+                                        onSaved:(value) => contact.email = value, 
+                                        validator: (String value) => (value.isEmpty)?"Ingrese un correo":null,
                                         decoration: InputDecoration(
                                           labelText:
                                               "Correo; example@correo.com",
@@ -129,11 +135,13 @@ class _FormContactoState extends State<FormContacto> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
-                                        validator: (String value) {
-                                          if (value.isEmpty) {
-                                            return "Se debe ingresar un telefono";
-                                          }
-                                          return null;
+                                        onSaved: (value) => contact.phoneNumber = int.parse(value),
+                                        validator:(String value){
+                                           if(value.isEmpty){
+                                             return "El campo está vacío";
+                                           }else{
+                                              return(utils.isNumeric(value) && value.length==10)?null:"No es un número válido";
+                                           }
                                         },
                                         keyboardType: TextInputType.phone,
                                         decoration: InputDecoration(
@@ -148,7 +156,7 @@ class _FormContactoState extends State<FormContacto> {
                                       padding: const EdgeInsets.all(30.0),
                                       child: RaisedButton(
                                         elevation: 0.0,
-                                        onPressed: () {},
+                                       
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(80.0)),
@@ -178,6 +186,14 @@ class _FormContactoState extends State<FormContacto> {
                                             ),
                                           ),
                                         ),
+                                        onPressed: () {
+                                            if(!formKey.currentState.validate()){
+                                               return;
+                                            }else{
+                                               formKey.currentState.save();
+                                               contactoProvider.crearContacto(contact, _prefs.idUser);  
+                                            }
+                                        },
                                       ),
                                     )
                                   ],

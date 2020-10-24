@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class PreferenciasUsuario {
 
   static final PreferenciasUsuario _instancia = new PreferenciasUsuario._internal();
@@ -33,6 +34,37 @@ class PreferenciasUsuario {
 
   set ultimaPagina( String value ) {
     _prefs.setString('ultimaPagina', value);
+  } 
+
+   get nombre {
+    return _prefs.getString('nombre') ?? '';
   }
 
+  set nombre( String value ) {
+    _prefs.setString('nombre', value);
+  }
+
+  get idUser {
+    return _prefs.getString('idUser') ?? '';
+  }
+
+  set idUser( String value ) {
+    _prefs.setString('idUser', value);
+  }
+
+  get userMail {
+    return _prefs.getString('userMail') ?? '';
+  }
+
+  set userMail( String value ) {
+    _prefs.setString('userMail', value);
+  } 
+
+  get inicioPage {
+    return _prefs.getString('inicioPage') ?? '';
+  }
+
+  set inicioPage( String value ) {
+    _prefs.setString('inicioPage', value);
+  }
 }

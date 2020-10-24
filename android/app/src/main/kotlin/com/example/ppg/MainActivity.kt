@@ -1,4 +1,4 @@
-package com.afonsoraposo.ppg
+package com.simoric_project.martin
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

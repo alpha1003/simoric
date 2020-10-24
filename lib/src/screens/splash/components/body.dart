@@ -77,7 +77,7 @@ class _BodyState extends State<Body> {
                     DefaultButton(
                       text: "Continuar",
                       press: () {
-                        Navigator.pushNamed(context, prefs.ultimaPagina);
+                        Navigator.pushNamed(context, LoginPage.routeName);
                       },
                     ),
                     Spacer(),
