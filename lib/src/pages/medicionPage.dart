@@ -5,7 +5,7 @@ import 'package:wakelock/wakelock.dart';
 import '../../chart.dart';
 
 class MedicionPage extends StatefulWidget {
-  static final routeName = "medicionPage"; 
+  static final routeName = "medicionPage";
   @override
   MedicionPageView createState() {
     return MedicionPageView();
@@ -27,7 +27,7 @@ class MedicionPageView extends State<MedicionPage>
   double _avg; // store the average value during calculation
   DateTime _now; // store the now Datetime
   Timer _timer; // timer for image processing
-  List<int> _bpmList = List<int>(); 
+  List<int> _bpmList = List<int>();
 
   @override
   void initState() {
@@ -227,7 +227,7 @@ class MedicionPageView extends State<MedicionPage>
       _controller = CameraController(_cameras.first, ResolutionPreset.low);
       await _controller.initialize();
       Future.delayed(Duration(milliseconds: 100)).then((onValue) {
-        _controller.flash(true);
+        _controller.setFlashMode(FlashMode.always);
       });
       _controller.startImageStream((CameraImage image) {
         _image = image;
@@ -256,13 +256,11 @@ class MedicionPageView extends State<MedicionPage>
       _data.removeAt(0);
     }
     setState(() {
-      if(_avg>70 && _avg<90){
-          _data.add(SensorValue(_now, _avg));
-      }else{
-
-      }  
-      print("SENSOR: "+_data[30].value.toString()); 
-      //Los valores varian en un rango de 80 - 85 con el dedo en la cámara -- VERIFICAR 
+      if (_avg > 70 && _avg < 90) {
+        _data.add(SensorValue(_now, _avg));
+      } else {}
+      print("SENSOR: " + _data[30].value.toString());
+      //Los valores varian en un rango de 80 - 85 con el dedo en la cámara -- VERIFICAR
     });
   }
 
@@ -308,26 +306,27 @@ class MedicionPageView extends State<MedicionPage>
       if (_counter > 0) {
         _bpm = _bpm / _counter;
         print(_bpm);
-        
+
         setState(() {
           this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
-          _bpmList.add(_bpm.toInt());  
+          _bpmList.add(_bpm.toInt());
         });
       }
       await Future.delayed(Duration(
           milliseconds:
               1000 * _windowLen ~/ _fs)); // wait for a new set of _data values
-      
-      if(_bpmList.length>4){
-        int sum; 
-        _bpmList.forEach((element) {sum = sum + element;});
-       print("LISTA: "+_bpmList.toString());
-       setState(() {
-          _bpm = (sum/5); 
-          _untoggle();  
-      });
-     }
-    }  
-  }
 
+      if (_bpmList.length > 4) {
+        int sum;
+        _bpmList.forEach((element) {
+          sum = sum + element;
+        });
+        print("LISTA: " + _bpmList.toString());
+        setState(() {
+          _bpm = (sum / 5);
+          _untoggle();
+        });
+      }
+    }
+  }
 }
