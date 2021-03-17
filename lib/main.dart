@@ -10,30 +10,25 @@ import 'package:flutter/services.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:simoric/src/pages/homePage.dart';
 import 'package:simoric/src/pages/login_page.dart';
+import 'package:simoric/src/pages/medicionPage.dart';
 import 'package:simoric/src/pages/recomendacionesPage.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/screens/splash/splash_screen.dart';
 
-
-
-
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   final _prefs = new PreferenciasUsuario();
   await _prefs.initPrefs();
-  await Firebase.initializeApp(); 
-  final _auth = FirebaseAuth.instance; 
+  await Firebase.initializeApp();
+  final _auth = FirebaseAuth.instance;
 
-  
-  _auth.authStateChanges()
-  .listen((User user) {
+  _auth.authStateChanges().listen((User user) {
     if (user == null) {
       print('User is currently signed out!');
-      _prefs.inicioPage = SplashScreen.routeName; 
+      _prefs.inicioPage = SplashScreen.routeName;
     } else {
       print('User is signed in!');
-      print(_auth.currentUser); 
+      print(_auth.currentUser);
       _prefs.inicioPage = HomePage.routeName;
     }
   });
@@ -47,21 +42,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   Widget build(BuildContext context) {
     final _prefs = new PreferenciasUsuario();
-   
 
     if (_prefs.token != "") {
       print("TOKEN: ${_prefs.token}");
       _prefs.ultimaPagina = HomePage.routeName;
     } else {
-      _prefs.ultimaPagina = LoginPage.routeName;
-    } 
-
-
-
+      _prefs.ultimaPagina = HomePage.routeName;
+    }
 
     return Provider(
       child: MaterialApp(
@@ -84,7 +74,7 @@ class _MyAppState extends State<MyApp> {
           brightness: Brightness.light,
           primaryColor: kPrimaryColor,
         ),
-        initialRoute:_prefs.inicioPage,
+        initialRoute: MedicionPage.routeName,
         routes: routes,
       ),
     );

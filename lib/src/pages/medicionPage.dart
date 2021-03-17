@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:torch_compat/torch_compat.dart';
 import '../../chart.dart';
 
 class MedicionPage extends StatefulWidget {
@@ -15,7 +16,7 @@ class MedicionPage extends StatefulWidget {
 class MedicionPageView extends State<MedicionPage>
     with SingleTickerProviderStateMixin {
   bool _toggled = false; // toggle button value
-  List<SensorValue> _data = List<SensorValue>(); // array to store the values
+  List<SensorValue> _data = []; // array to store the values
   CameraController _controller;
   double _alpha = 0.3; // factor for the mean value
   AnimationController _animationController;
@@ -27,7 +28,7 @@ class MedicionPageView extends State<MedicionPage>
   double _avg; // store the average value during calculation
   DateTime _now; // store the now Datetime
   Timer _timer; // timer for image processing
-  List<int> _bpmList = List<int>();
+  List<int> _bpmList = <int>[];
 
   @override
   void initState() {
@@ -226,8 +227,8 @@ class MedicionPageView extends State<MedicionPage>
       List _cameras = await availableCameras();
       _controller = CameraController(_cameras.first, ResolutionPreset.low);
       await _controller.initialize();
-      Future.delayed(Duration(milliseconds: 100)).then((onValue) {
-        _controller.setFlashMode(FlashMode.always);
+      Future.delayed(Duration(milliseconds: 100)).then((onValue) async {
+        _controller.setFlashMode(FlashMode.torch);
       });
       _controller.startImageStream((CameraImage image) {
         _image = image;
