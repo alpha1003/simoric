@@ -1,16 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
+import 'package:simoric/src/pages/login_page.dart';
+import 'package:simoric/src/pages/profilePage.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
+import 'package:simoric/src/utils/utils.dart' as utils;
 
 class MainDrawer extends StatelessWidget {
-  const MainDrawer({Key key}) : super(key: key); 
-
+  const MainDrawer({Key key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     final _prefs = PreferenciasUsuario();
+    LoginBloc bloc = LoginBloc();
 
-    final _auth = FirebaseAuth.instance; 
+    bloc.cargarUsuario();
+
+    final _auth = FirebaseAuth.instance;
 
     return Column(children: [
       Container(
@@ -50,7 +56,8 @@ class MainDrawer extends StatelessWidget {
       //Now let's Add the button for the Menu
       //and let's copy that and modify it
       ListTile(
-        onTap: () {},
+        onTap: () => Navigator.pushNamed(context, ProfilePage.routeName,
+            arguments: bloc.user),
         leading: Icon(
           Icons.person,
           color: Colors.black,
@@ -77,7 +84,14 @@ class MainDrawer extends StatelessWidget {
       ),
       ListTile(
         onTap: () async {
-            final res = await _auth.signOut(); 
+          var res = await utils.confirmar2(context);
+          if (res == true) {
+            await _auth.signOut().then((value) {
+              utils.mostrarAlerta(
+                  context, "Se ha cerrado la sesion", "INFORMACION");
+              Navigator.pushReplacementNamed(context, LoginPage.routeName);
+            });
+          }
         },
         leading: Icon(
           Icons.exit_to_app,

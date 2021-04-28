@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
+import 'package:simoric/src/models/registroModel.dart';
 import 'package:simoric/src/pages/constant.dart';
 import 'package:simoric/src/pages/contactosPage.dart';
 import 'package:simoric/src/pages/medicionPage.dart';
+import 'package:simoric/src/utils/utils.dart' as utils;
 import 'package:simoric/src/pages/widgets/headerWidget.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
+import 'package:simoric/src/provider/registroProvider.dart';
 
 import 'widgets/mainDrawer.dart';
 
@@ -12,12 +18,30 @@ class DiagnosticoPage extends StatefulWidget {
 }
 
 class _DiagnosticoPageState extends State<DiagnosticoPage> {
+  List<RegistroModel> _lista;
+  RegistroProvider _rp = RegistroProvider();
+  PreferenciasUsuario _prefs = PreferenciasUsuario();
+  RegistroProvider _registroProvider = RegistroProvider();
+  LoginBloc bloc = LoginBloc();
+
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size * 1.5;
+
+    bloc.cargarRegistros();
+
     return SafeArea(
       child: Scaffold(
           appBar: buildAppbar(),
-          body: Body(),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                HeaderWidget(size: size, text: "Diagnóstico"),
+                _crearListado(bloc),
+              ],
+            ),
+          ),
           drawer: Drawer(
             child: MainDrawer(),
           ),
@@ -25,8 +49,7 @@ class _DiagnosticoPageState extends State<DiagnosticoPage> {
               onPressed: () =>
                   Navigator.pushNamed(context, MedicionPage.routeName),
               child: Icon(Icons.local_hospital),
-              backgroundColor: Colors.blueAccent)
-      ),
+              backgroundColor: Colors.blueAccent)),
     );
   }
 
@@ -36,99 +59,65 @@ class _DiagnosticoPageState extends State<DiagnosticoPage> {
       elevation: 0.0,
     );
   }
-}
 
-class Tabla extends StatelessWidget {
-  const Tabla({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: DataTable(
-            onSelectAll: (b) {},
-            sortColumnIndex: 0,
-            sortAscending: true,
-            columns: <DataColumn>[
-              DataColumn(
-                label: Text("Fecha"),
-                tooltip: "To display first name of the Name",
-              ),
-              DataColumn(
-                label: Text("Frecuencia"),
-                numeric: false,
-                tooltip: "To display number cell",
-              ),
-              DataColumn(
-                label: Text("Bpm"),
-                numeric: false,
-                tooltip: "To display number cell",
-              ),
-              DataColumn(
-                label: Text("Detalles"),
-                tooltip: "To display delete",
-              ),
-            ],
-            rows: names
-                .map(
-                  (name) => DataRow(
-                    cells: [
-                      DataCell(
-                        Container(
-                          width: 80,
-                          child: Text(name.fecha),
-                        ),
-                      ),
-                      DataCell(
-                        Container(width: 50, child: Text(name.frecuencia)),
-                      ),
-                      DataCell(
-                        Container(width: 50, child: Text(name.bpm)),
-                      ),
-                      DataCell(
-                        Container(
-                            width: 50,
-                            child: IconButton(
-                                icon: Icon(
-                                  Icons.open_in_browser,
-                                  color: Colors.blue,
-                                ),
-                                onPressed: null)),
-                      ),
-                    ],
-                  ),
-                )
-                .toList()));
-  }
-}
-
-class Body extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // It will provie us total height  and width of our screen
-    Size size = MediaQuery.of(context).size * 1.5;
-    // it enable scrolling on small device
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-         HeaderWidget(size: size, text: "Diagnóstico"),
-          Tabla(),
-        ],
-      ),
+  Widget _crearListado(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.lista2Stream,
+      builder:
+          (BuildContext context, AsyncSnapshot<List<RegistroModel>> snapshot) {
+        if (snapshot.hasData) {
+          final registros = snapshot.data;
+          return ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: registros.length,
+            itemBuilder: (context, i) => _crearItem(context, registros[i]),
+          );
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
+
+  Widget _crearItem(BuildContext context, RegistroModel registro) {
+    return Dismissible(
+        key: UniqueKey(),
+        background: Container(
+          color: Colors.red,
+        ),
+        onDismissed: (direccion) {
+          _registroProvider.borrarRegistro(_prefs.idUser, registro.id);
+        },
+        confirmDismiss: (direccion) async {
+          return await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  content: Text("Desea eliminar el item?"),
+                  title: Text("Confirmacion"),
+                  actions: [
+                    FlatButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text("NO")),
+                    FlatButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: Text("SÍ")),
+                  ],
+                );
+              });
+        },
+        child: Card(
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                title: Text("Fecha: ${registro.fecha}"),
+                subtitle: Text("BPM: ${registro.bpm} \n"
+                    "Frecuencia: ${registro.alerta}"),
+                //onTap: () => Navigator.pushNamed(context, ProductoPage.routeName, arguments: producto ),
+              ),
+            ],
+          ),
+        ));
+  }
 }
-
-class Name {
-  String fecha;
-  String frecuencia;
-  String bpm;
-
-  Name({this.fecha, this.frecuencia, this.bpm});
-}
-
-var names = <Name>[
-  Name(fecha: "3/10/2020", frecuencia: "Normal", bpm: "82"),
-];

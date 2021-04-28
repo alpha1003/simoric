@@ -1,8 +1,14 @@
 import 'dart:async';
 import 'package:camera/camera.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
+import 'package:simoric/src/models/registroModel.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
+import 'package:simoric/src/provider/registroProvider.dart';
 import 'package:wakelock/wakelock.dart';
-import 'package:torch_compat/torch_compat.dart';
+import 'package:simoric/src/utils/utils.dart' as utils;
 import '../../chart.dart';
 
 class MedicionPage extends StatefulWidget {
@@ -15,6 +21,8 @@ class MedicionPage extends StatefulWidget {
 
 class MedicionPageView extends State<MedicionPage>
     with SingleTickerProviderStateMixin {
+  LoginBloc bloc = LoginBloc();
+
   bool _toggled = false; // toggle button value
   List<SensorValue> _data = []; // array to store the values
   CameraController _controller;
@@ -22,6 +30,7 @@ class MedicionPageView extends State<MedicionPage>
   AnimationController _animationController;
   double _iconScale = 1;
   int _bpm = 0; // beats per minute
+  double _lastAvg = 0;
   int _fs = 30; // sampling frequency (fps)
   int _windowLen = 30 * 6; // window length to display - 6 seconds
   CameraImage _image; // store the last camera image
@@ -29,6 +38,15 @@ class MedicionPageView extends State<MedicionPage>
   DateTime _now; // store the now Datetime
   Timer _timer; // timer for image processing
   List<int> _bpmList = <int>[];
+  int _bpmFinal = 0;
+
+  final firestoreInstance = FirebaseFirestore.instance;
+  final _prefs = PreferenciasUsuario();
+
+  TextStyle styleText = TextStyle(
+    fontSize: 21.2,
+    color: Colors.black,
+  );
 
   @override
   void initState() {
@@ -75,6 +93,30 @@ class MedicionPageView extends State<MedicionPage>
       body: SafeArea(
         child: Column(
           children: <Widget>[
+            Container(
+              margin: EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        "Instrucciones",
+                        style: styleText,
+                      )
+                    ],
+                    mainAxisAlignment: MainAxisAlignment.center,
+                  ),
+                  Text(
+                    "1. Asegurese de que su dedo cobra el flash y la cámara principal.",
+                    style: styleText,
+                  ),
+                  Text(
+                    "2. Mantenga el dedo hasta que podamos calcular su ritmo cardiaco.",
+                    style: styleText,
+                  ),
+                ],
+              ),
+            ),
             Expanded(
                 flex: 1,
                 child: Row(
@@ -134,10 +176,21 @@ class MedicionPageView extends State<MedicionPage>
                             style: TextStyle(fontSize: 18, color: Colors.grey),
                           ),
                           Text(
-                            (_bpm > 30 && _bpm < 150 ? _bpm.toString() : "--"),
+                            (_bpmFinal > 0 ? _bpmFinal.toString() : "--"),
                             style: TextStyle(
                                 fontSize: 32, fontWeight: FontWeight.bold),
                           ),
+                          RaisedButton(
+                            color: Colors.greenAccent,
+                            onPressed: () {
+                              if (_bpmFinal > 0) {
+                                _preguntar(context);
+                              } else {
+                                utils.mostrarAlerta(context,"No hay registro que guardar", "Alerta");
+                              }
+                            },
+                            child: Text("GUARDAR REGISTRO"),
+                          )
                         ],
                       )),
                     ),
@@ -172,7 +225,8 @@ class MedicionPageView extends State<MedicionPage>
                     borderRadius: BorderRadius.all(
                       Radius.circular(18),
                     ),
-                    color: Colors.black),
+                    border: Border.all(color: Colors.black),
+                    color: Colors.white38),
                 child: Chart(_data),
               ),
             ),
@@ -259,8 +313,11 @@ class MedicionPageView extends State<MedicionPage>
     setState(() {
       if (_avg > 70 && _avg < 90) {
         _data.add(SensorValue(_now, _avg));
-      } else {}
-      print("SENSOR: " + _data[30].value.toString());
+        _lastAvg = _avg;
+      } else {
+        _data.add(SensorValue(_now, _lastAvg));
+      }
+      //print("SENSOR: " + _data[30].value.toString());
       //Los valores varian en un rango de 80 - 85 con el dedo en la cámara -- VERIFICAR
     });
   }
@@ -308,26 +365,85 @@ class MedicionPageView extends State<MedicionPage>
         _bpm = _bpm / _counter;
         print(_bpm);
 
-        setState(() {
-          this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
-          _bpmList.add(_bpm.toInt());
-        });
+        //setState(() {
+        //  this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
+        //  _bpmList.add(_bpm.toInt());
+        //});
+        this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
+        _bpmList.add(_bpm.toInt());
       }
       await Future.delayed(Duration(
           milliseconds:
-              1000 * _windowLen ~/ _fs)); // wait for a new set of _data values
+              500 * _windowLen ~/ _fs)); // wait for a new set of _data values
 
-      if (_bpmList.length > 4) {
-        int sum;
+      if (_bpmList.length > 3) {
+        int sum = 0;
         _bpmList.forEach((element) {
           sum = sum + element;
         });
         print("LISTA: " + _bpmList.toString());
         setState(() {
-          _bpm = (sum / 5);
+          _bpmFinal = (sum ~/ 4);
+          print(_bpm);
           _untoggle();
+          _bpmList.clear();
         });
       }
     }
+  }
+
+  void _preguntar(BuildContext c) {
+    showDialog(
+      context: c,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Save"),
+        content: Text("Desea guardar el presente registro?"),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(), child: Text("No")),
+          TextButton(
+              child: Text("Sí"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _guardarRegistro().whenComplete(() {
+                  utils.mostrarAlerta(c, "Se ha guardado el registro", "Aviso");
+                });
+                Future.delayed(Duration(seconds: 2));
+                Navigator.of(c).pop();
+              }),
+        ],
+      ),
+    );
+  }
+
+  Future<DocumentReference> _guardarRegistro() async {
+    DateTime date = DateTime.now();
+    var formatter = new DateFormat("yyyy-MM-dd");
+    String formattedDate = formatter.format(date);
+
+    RegistroModel reg = new RegistroModel();
+    RegistroProvider rp = RegistroProvider();
+
+    reg.fecha = formattedDate;
+    reg.bpm = _bpmFinal;
+
+    if (_bpmFinal > 150) {
+      reg.alerta = "Alerta máxima";
+    } else {
+      if (_bpmFinal <= 150 && _bpmFinal > 100) {
+        reg.alerta = "Alerta media";
+      } else {
+        reg.alerta = "Normal";
+      }
+    }
+
+    var res = await rp.agregarRegistro(_prefs.idUser, reg);
+    print(res.toString());
+
+    return res;
+  }
+
+  void _salir() {
+    Navigator.of(context).pop();
   }
 }

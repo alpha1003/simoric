@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simoric/src/pages/login_page.dart';
@@ -16,8 +15,7 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-
-  final prefs = PreferenciasUsuario();  
+  final prefs = PreferenciasUsuario();
 
   int currentPage = 0;
   List<Map<String, String>> splashData = [
@@ -77,7 +75,8 @@ class _BodyState extends State<Body> {
                     DefaultButton(
                       text: "Continuar",
                       press: () {
-                        Navigator.pushNamed(context, LoginPage.routeName);
+                        Navigator.pushReplacementNamed(
+                            context, LoginPage.routeName);
                       },
                     ),
                     Spacer(),

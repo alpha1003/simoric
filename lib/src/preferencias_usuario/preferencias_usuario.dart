@@ -1,9 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class PreferenciasUsuario {
-
-  static final PreferenciasUsuario _instancia = new PreferenciasUsuario._internal();
+  static final PreferenciasUsuario _instancia =
+      new PreferenciasUsuario._internal();
 
   factory PreferenciasUsuario() {
     return _instancia;
@@ -22,25 +21,24 @@ class PreferenciasUsuario {
     return _prefs.getString('token') ?? '';
   }
 
-  set token( String value ) {
+  set token(String value) {
     _prefs.setString('token', value);
   }
-  
 
   // GET y SET de la última página
   get ultimaPagina {
     return _prefs.getString('ultimaPagina') ?? 'login';
   }
 
-  set ultimaPagina( String value ) {
+  set ultimaPagina(String value) {
     _prefs.setString('ultimaPagina', value);
-  } 
+  }
 
-   get nombre {
+  get nombre {
     return _prefs.getString('nombre') ?? '';
   }
 
-  set nombre( String value ) {
+  set nombre(String value) {
     _prefs.setString('nombre', value);
   }
 
@@ -48,7 +46,7 @@ class PreferenciasUsuario {
     return _prefs.getString('idUser') ?? '';
   }
 
-  set idUser( String value ) {
+  set idUser(String value) {
     _prefs.setString('idUser', value);
   }
 
@@ -56,15 +54,23 @@ class PreferenciasUsuario {
     return _prefs.getString('userMail') ?? '';
   }
 
-  set userMail( String value ) {
+  set userMail(String value) {
     _prefs.setString('userMail', value);
-  } 
+  }
 
   get inicioPage {
     return _prefs.getString('inicioPage') ?? '';
   }
 
-  set inicioPage( String value ) {
+  set inicioPage(String value) {
     _prefs.setString('inicioPage', value);
+  }
+
+  get first {
+    return _prefs.getBool('first') ?? true;
+  }
+
+  set first(bool value) {
+    _prefs.setBool('first', value);
   }
 }

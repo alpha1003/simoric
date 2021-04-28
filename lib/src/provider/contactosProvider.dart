@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:http/http.dart' as http;
@@ -9,49 +10,51 @@ import 'package:simoric/src/models/usuarioModel.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 
 class ContactoProvider {
+  final firestoreInstance = FirebaseFirestore.instance;
+
   final String _url = "https://simoric.firebaseio.com";
-  final _prefs = new PreferenciasUsuario(); 
+  final _prefs = new PreferenciasUsuario();
 
-  final  fb = FirebaseDatabase.instance; 
+  final fb = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
 
-
-  Future<Map<String, dynamic>> crearContacto(ContactModel contact,String uId) async {
-       contact.uid = uId; 
-       await fb.reference().child("contacts").push().set(contact.toJson());   
-  }
- 
-  Future<List<ContactModel>> cargarContactos(String uId) async { 
-
-     Map result; 
-     final contactsRef = fb.reference().child("contacts"); 
-     List<ContactModel> lista = new List(); 
-
-     
-    contactsRef.orderByChild("uid").equalTo(_prefs.idUser).onValue.listen((event) { 
-      result = event.snapshot.value; 
-
-      if(result.length>0){
-          result.forEach((key, value) {  
-            final model = ContactModel.fromDynamic(value);
-            model.id = key;  
-            lista.add(model);  
-         });
-      }
-           
-     }); 
-  
-    return lista; 
-
+  Future<DocumentReference> crearContacto(
+      ContactModel contact, String uId) async {
+    var res = await firestoreInstance
+        .collection("users")
+        .doc(uId)
+        .collection("contactos")
+        .add(contact.toJson());
+    return res;
   }
 
+  Future<List<ContactModel>> cargarContactos(String uId) async {
+    List<ContactModel> lista = List();
 
-  Future<int> borrarContacto( String uId,contactId ) async { 
+    await firestoreInstance
+        .collection("users")
+        .doc(_prefs.idUser)
+        .collection("contactos")
+        .get()
+        .then((value) {
+      value.docs.forEach((element) {
+        ContactModel cont = ContactModel.fromJson(element.data());
+        cont.id = element.id;
+        lista.add(cont);
+      });
+    });
 
-    final url  = '$_url/usuarios/$uId/contactos/$contactId.json?auth=${_prefs.token}';
-    final resp = await http.delete(url);
-    print( resp.body );
+    return lista;
+  }
+
+  Future<int> borrarContacto(String uId, contactId) async {
+    firestoreInstance
+        .collection("users")
+        .doc(_prefs.idUser)
+        .collection("contactos")
+        .doc(contactId)
+        .delete();
+
     return 1;
   }
 }

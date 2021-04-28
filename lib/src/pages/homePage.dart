@@ -49,14 +49,12 @@ class _HomePageState extends State<HomePage> {
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          title: Text("Inicio"),
+          label: "Inicio",
         ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.fingerprint), title: Text("Medicion")),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.history), title: Text("Contactos")),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.healing), title: Text("Cuidados")),
+            icon: Icon(Icons.fingerprint), label: "Medicion"),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: "Contactos"),
+        BottomNavigationBarItem(icon: Icon(Icons.healing), label: "Cuidados"),
       ],
       currentIndex: _currentIndex,
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
 import 'package:simoric/src/pages/constant.dart';
 import 'package:simoric/src/pages/widgets/headerWidget.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
@@ -11,8 +12,7 @@ class InicioPage extends StatefulWidget {
 }
 
 class _InicioPageState extends State<InicioPage> {
-
-  
+  LoginBloc bloc = LoginBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +32,9 @@ AppBar buildAppBar() {
   );
 }
 
-class Body extends StatelessWidget { 
-  PreferenciasUsuario _prefs = PreferenciasUsuario(); 
-   
+class Body extends StatelessWidget {
+  PreferenciasUsuario _prefs = PreferenciasUsuario();
+
   @override
   Widget build(BuildContext context) {
     // It will provie us total height  and width of our screen
@@ -44,7 +44,10 @@ class Body extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          HeaderWidget(size: size, text: "Bienvenido ${_prefs.nombre}",),
+          HeaderWidget(
+            size: size,
+            text: "Bienvenido ${_prefs.nombre}",
+          ),
           TituloConBoton(title: "Recomendaciones", press: () {}),
           Recomendados(),
           TituloConBoton(title: "¿Como te sientes hoy?", press: () {}),

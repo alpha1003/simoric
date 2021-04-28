@@ -11,10 +11,13 @@ class Chart extends StatelessWidget {
     return new charts.TimeSeriesChart([
       charts.Series<SensorValue, DateTime>(
         id: 'Values',
-        colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
+        colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
         domainFn: (SensorValue values, _) => values.time,
         measureFn: (SensorValue values, _) => values.value,
         data: _data,
+        areaColorFn: (_, __) => charts.MaterialPalette.gray.shade300,
+        
+        
       )
     ],
         animate: false,
