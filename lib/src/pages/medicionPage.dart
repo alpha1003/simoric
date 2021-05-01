@@ -4,9 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:simoric/src/bloc/login_bloc.dart';
+import 'package:simoric/src/provider/mensajesProvider.dart';
 import 'package:simoric/src/models/registroModel.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/provider/registroProvider.dart';
+import 'package:simoric/src/models/contactModel.dart';
+import 'package:simoric/src/provider/contactosProvider.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:simoric/src/utils/utils.dart' as utils;
 import '../../chart.dart';
@@ -22,6 +25,11 @@ class MedicionPage extends StatefulWidget {
 class MedicionPageView extends State<MedicionPage>
     with SingleTickerProviderStateMixin {
   LoginBloc bloc = LoginBloc();
+
+  ContactoProvider _contactoProvider = ContactoProvider();
+  ContactModel _contacto = ContactModel();
+  MensajeProvider _mensajeProvider = MensajeProvider();
+  int _selectedIndex;
 
   bool _toggled = false; // toggle button value
   List<SensorValue> _data = []; // array to store the values
@@ -50,6 +58,8 @@ class MedicionPageView extends State<MedicionPage>
 
   @override
   void initState() {
+    bloc.cargarContactos();
+    bloc.cargarUsuario();
     super.initState();
     _animationController =
         AnimationController(duration: Duration(milliseconds: 500), vsync: this);
@@ -107,11 +117,15 @@ class MedicionPageView extends State<MedicionPage>
                     mainAxisAlignment: MainAxisAlignment.center,
                   ),
                   Text(
-                    "1. Asegurese de que su dedo cobra el flash y la cámara principal.",
+                    "1. Toque el ícono del centro y luego coloque su dedo.",
                     style: styleText,
                   ),
                   Text(
-                    "2. Mantenga el dedo hasta que podamos calcular su ritmo cardiaco.",
+                    "2. Asegurese de que su dedo cobra el flash y la cámara principal.",
+                    style: styleText,
+                  ),
+                  Text(
+                    "3. Mantenga el dedo hasta que podamos calcular su ritmo cardiaco.",
                     style: styleText,
                   ),
                 ],
@@ -176,7 +190,9 @@ class MedicionPageView extends State<MedicionPage>
                             style: TextStyle(fontSize: 18, color: Colors.grey),
                           ),
                           Text(
-                            (_bpmFinal > 0 ? _bpmFinal.toString() : "--"),
+                            (_bpmFinal > 0
+                                ? _bpmFinal.toString() + " BPM"
+                                : "--"),
                             style: TextStyle(
                                 fontSize: 32, fontWeight: FontWeight.bold),
                           ),
@@ -186,11 +202,17 @@ class MedicionPageView extends State<MedicionPage>
                               if (_bpmFinal > 0) {
                                 _preguntar(context);
                               } else {
-                                utils.mostrarAlerta(context,"No hay registro que guardar", "Alerta");
+                                utils.mostrarAlerta(context,
+                                    "No hay registro que guardar", "Alerta");
                               }
                             },
                             child: Text("GUARDAR REGISTRO"),
-                          )
+                          ),
+                          RaisedButton(
+                            color: Colors.redAccent,
+                            onPressed: () => _preguntar2(context),
+                            child: Text("ENVIAR ALERTA"),
+                          ),
                         ],
                       )),
                     ),
@@ -257,6 +279,7 @@ class MedicionPageView extends State<MedicionPage>
       });
       // after is toggled
       _initTimer();
+      Future.delayed(Duration(seconds: 2));
       _updateBPM();
     });
   }
@@ -279,7 +302,7 @@ class MedicionPageView extends State<MedicionPage>
   Future<void> _initController() async {
     try {
       List _cameras = await availableCameras();
-      _controller = CameraController(_cameras.first, ResolutionPreset.low);
+      _controller = CameraController(_cameras.first, ResolutionPreset.medium);
       await _controller.initialize();
       Future.delayed(Duration(milliseconds: 100)).then((onValue) async {
         _controller.setFlashMode(FlashMode.torch);
@@ -311,9 +334,9 @@ class MedicionPageView extends State<MedicionPage>
       _data.removeAt(0);
     }
     setState(() {
-      if (_avg > 70 && _avg < 90) {
+      if (_avg > 75 && _avg < 99) {
         _data.add(SensorValue(_now, _avg));
-        _lastAvg = _avg;
+        _lastAvg = _avg - 5;
       } else {
         _data.add(SensorValue(_now, _lastAvg));
       }
@@ -372,9 +395,7 @@ class MedicionPageView extends State<MedicionPage>
         this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
         _bpmList.add(_bpm.toInt());
       }
-      await Future.delayed(Duration(
-          milliseconds:
-              500 * _windowLen ~/ _fs)); // wait for a new set of _data values
+      // wait for a new set of _data values
 
       if (_bpmList.length > 3) {
         int sum = 0;
@@ -389,6 +410,8 @@ class MedicionPageView extends State<MedicionPage>
           _bpmList.clear();
         });
       }
+
+      await Future.delayed(Duration(milliseconds: 500 * _windowLen ~/ _fs));
     }
   }
 
@@ -413,6 +436,126 @@ class MedicionPageView extends State<MedicionPage>
               }),
         ],
       ),
+    );
+  }
+
+  Future<Widget> _preguntar2(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: Text("Seleccione uno de sus contactos"),
+                content: _listaContactos(context, setState),
+                actions: [
+                  FlatButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text("CANCELAR")),
+                  FlatButton(
+                    child: Text("SELECCIONAR"),
+                    onPressed: () async {
+                      var resp;
+
+                      await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text("CONFIRMACION"),
+                              content:
+                                  Text("Enviar mensaje a ${_contacto.name}?"),
+                              actions: [
+                                FlatButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("NO")),
+                                FlatButton(
+                                  onPressed: () async {
+                                    String msg = "Hola " +
+                                        _contacto.name +
+                                        ", te informamos que " +
+                                        bloc.user.name +
+                                        " " +
+                                        bloc.user.lastname +
+                                        " tiene problemas de salud y necesita tu ayuda." +
+                                        "Comunicate al: " +
+                                        bloc.user.phoneNumber.toString();
+
+                                    resp = await _mensajeProvider.enviarSms(
+                                        _contacto.phoneNumber.toString(), msg);
+                                    Navigator.of(context).pop();
+                                    utils.mostrarAlerta(
+                                        context, resp.toString(), "RESULTADO");
+                                  },
+                                  child: Text("SÍ"),
+                                ),
+                              ],
+                            );
+                          });
+                    },
+                  )
+                ],
+              );
+            },
+          );
+        });
+  }
+
+  Widget _listaContactos(BuildContext context, Function setState) {
+    return FutureBuilder(
+        future: _contactoProvider.cargarContactos(_prefs.idUser),
+        builder: (context, AsyncSnapshot<List<ContactModel>> snapshot) {
+          if (snapshot.hasData) {
+            final lista = snapshot.data;
+            return Container(
+              height: 300.0,
+              width: 300.0,
+              child: ListView.builder(
+                  itemCount: lista.length,
+                  scrollDirection: Axis.vertical,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      key: UniqueKey(),
+                      selected: index == _selectedIndex,
+                      tileColor:
+                          index == _selectedIndex ? Colors.greenAccent : null,
+                      trailing: _selectedIndex == index
+                          ? Icon(Icons.check_box)
+                          : Icon(Icons.check_box_outline_blank),
+                      title: Text(lista[index].name),
+                      subtitle: Text(lista[index].phoneNumber.toString()),
+                      onTap: () {
+                        if (_selectedIndex != index) {
+                          setState(() {
+                            _selectedIndex = index;
+                            _contacto = lista[index];
+                          });
+                        }
+                      },
+                    );
+                  }),
+            );
+          }
+
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        });
+  }
+
+  Widget _crearItem(BuildContext context, ContactModel contacto, int index) {
+    return ListTile(
+      key: UniqueKey(),
+      hoverColor: Colors.black,
+      tileColor: index == _selectedIndex ? Colors.greenAccent : null,
+      title: Text(contacto.name),
+      subtitle: Text(contacto.phoneNumber.toString()),
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
     );
   }
 
