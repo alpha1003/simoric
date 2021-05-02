@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:simoric/src/utils/utils.dart' as utils;
 import 'package:http/http.dart' as http;
 import 'package:simoric/src/models/usuarioModel.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
@@ -45,16 +46,23 @@ class UsuarioProvider {
         .doc(uid)
         .get()
         .then((value) => model = UsuarioModel.fromJson(value.data()));
-
+    print(model.name);
     return model;
   }
 
-  Future<UserCredential> login2(String mail, String passwd) async {
-    final res =
-        await _auth.signInWithEmailAndPassword(email: mail, password: passwd);
-    print(res);
-    _prefs.idUser = res.user.uid;
-    return res;
+  Future login2(String mail, String passwd) async {
+    try {
+      final res =
+          await _auth.signInWithEmailAndPassword(email: mail, password: passwd);
+
+      return res;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        return "No user found for that email.";
+      } else if (e.code == 'wrong-password') {
+        return "Wrong password provided for that user.";
+      }
+    }
   }
 
   Future login(String mail, String passwd) async {

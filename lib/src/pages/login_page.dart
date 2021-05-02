@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:simoric/src/models/usuarioModel.dart';
 import 'package:simoric/src/pages/homePage.dart';
 import 'package:simoric/src/pages/registroPage.dart';
@@ -69,10 +71,10 @@ class LoginPage extends StatelessWidget {
                 Navigator.pushReplacementNamed(context, RegistroPage.routeName),
           ),
           FlatButton(
-            child: Text("Entrar como invitado"),
-            onPressed: () =>
-                Navigator.pushReplacementNamed(context, HomePage.routeName),
-          ),
+              child: Text("Entrar como invitado"),
+              onPressed: () =>
+                  _googleLogin() //Navigator.pushReplacementNamed(context, HomePage.routeName),
+              ),
           SizedBox(height: 100.0)
         ],
       ),
@@ -157,15 +159,14 @@ class LoginPage extends StatelessWidget {
   _login2(LoginBloc bloc, BuildContext context) async {
     final info = await usuarioProvider.login2(bloc.email, bloc.password);
 
-    if (info != null) {
+    if (info == auth.UserCredential) {
       _prefs.idUser = info.user.uid;
       _modelUser = await usuarioProvider.buscarUsuario(_prefs.idUser);
       bloc.cargarUsuario();
       _prefs.nombre = _modelUser.name;
       Navigator.pushReplacementNamed(context, HomePage.routeName);
     } else {
-      utils.mostrarAlerta(
-          context, "No se ha podido inicia sesion", "Hubo un error");
+      utils.mostrarAlerta(context, info, "Hubo un error");
     }
   }
 
@@ -214,5 +215,23 @@ class LoginPage extends StatelessWidget {
         )
       ],
     );
+  }
+
+  Future<auth.User> _googleLogin() async {
+    GoogleSignIn googleSignIn = GoogleSignIn();
+    final _auth = auth.FirebaseAuth.instance;
+
+    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final auth.GoogleAuthCredential credential =
+        auth.GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final firebaseUser = (await _auth.signInWithCredential(credential)).user;
+
+    return firebaseUser;
   }
 }

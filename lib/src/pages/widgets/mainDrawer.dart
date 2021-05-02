@@ -2,12 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:simoric/src/bloc/login_bloc.dart';
 import 'package:simoric/src/pages/login_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:simoric/src/pages/profilePage.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/utils/utils.dart' as utils;
 
 class MainDrawer extends StatelessWidget {
-  const MainDrawer({Key key}) : super(key: key);
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
   @override
   Widget build(BuildContext context) {
@@ -86,11 +87,18 @@ class MainDrawer extends StatelessWidget {
         onTap: () async {
           var res = await utils.confirmar2(context);
           if (res == true) {
-            await _auth.signOut().then((value) {
-              utils.mostrarAlerta(
-                  context, "Se ha cerrado la sesion", "INFORMACION");
-              Navigator.pushReplacementNamed(context, LoginPage.routeName);
-            });
+            await FirebaseAuth.instance.signOut();
+            await googleSignIn.disconnect();
+            await googleSignIn.signOut();
+
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil(LoginPage.routeName, (route) => false);
+            //await _auth.signOut().then((value) {
+            //  utils.mostrarAlerta(
+            //      context, "Se ha cerrado la sesion", "INFORMACION");
+            //  Future.delayed(Duration(seconds: 2));
+            //  Navigator.pushReplacementNamed(context, LoginPage.routeName);
+            //});
           }
         },
         leading: Icon(

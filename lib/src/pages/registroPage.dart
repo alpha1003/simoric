@@ -1,4 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simoric/src/bloc/login_bloc.dart';
 import 'package:simoric/src/bloc/provider.dart';
 import 'package:simoric/src/models/usuarioModel.dart';
@@ -6,6 +11,7 @@ import 'package:simoric/src/pages/homePage.dart';
 import 'package:simoric/src/pages/login_page.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/provider/usuarioProvider.dart';
+
 import 'package:simoric/src/utils/utils.dart' as utils;
 
 class RegistroPage extends StatefulWidget {
@@ -16,16 +22,115 @@ class RegistroPage extends StatefulWidget {
 }
 
 class _RegistroPageState extends State<RegistroPage> {
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final auth.FirebaseAuth firebaseAuth = auth.FirebaseAuth.instance;
+  SharedPreferences prefs;
+
+  bool isLoading = false;
+  bool isLoggedIn = false;
+  auth.User currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    isSignedIn();
+  }
+
+  void isSignedIn() async {
+    this.setState(() {
+      isLoading = true;
+    });
+
+    prefs = await SharedPreferences.getInstance();
+
+    isLoggedIn = await googleSignIn.isSignedIn();
+    if (isLoggedIn) {
+      Navigator.pushNamed(context, HomePage.routeName);
+    }
+
+    this.setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<Null> handleSignIn() async {
+    prefs = await SharedPreferences.getInstance();
+
+    this.setState(() {
+      isLoading = true;
+    });
+
+    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final auth.AuthCredential credential = auth.GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    auth.User firebaseUser =
+        (await firebaseAuth.signInWithCredential(credential)).user;
+
+    if (firebaseUser != null) {
+      // Check is already sign up
+      final QuerySnapshot result = await FirebaseFirestore.instance
+          .collection('users')
+          .where('id', isEqualTo: firebaseUser.uid)
+          .get();
+
+      final List<DocumentSnapshot> documents = result.docs;
+      if (documents.length == 0) {
+        // Update data to server if new user
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .set({
+          'name': firebaseUser.displayName,
+          'lastname': "lastname",
+          'email': firebaseUser.email,
+          'age': 1,
+          'phoneNumber': 1,
+          'photoUrl': firebaseUser.photoURL,
+          'id': firebaseUser.uid,
+          'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
+          'chattingWith': null
+        });
+
+        _prefs.nombre = firebaseUser.displayName;
+        _prefs.idUser = firebaseUser.uid;
+
+        // Write data to local
+        currentUser = firebaseUser;
+        await prefs.setString('id', currentUser.uid);
+        await prefs.setString('nickname', currentUser.displayName);
+        await prefs.setString('photoUrl', currentUser.photoURL);
+      } else {
+        // Write data to local
+        await prefs.setString('id', documents[0].data()['id']);
+        await prefs.setString('nickname', documents[0].data()['nickname']);
+        await prefs.setString('photoUrl', documents[0].data()['photoUrl']);
+        await prefs.setString('aboutMe', documents[0].data()['aboutMe']);
+      }
+      Fluttertoast.showToast(msg: "Sign in success");
+      this.setState(() {
+        isLoading = false;
+      });
+
+      Navigator.pushNamed(context, HomePage.routeName);
+    } else {
+      Fluttertoast.showToast(msg: "Sign in fail");
+      this.setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+////////////////////////////////////////////////////////////////////////////
   final usuarioProvider = new UsuarioProvider();
   final formkey = GlobalKey<FormState>();
   UsuarioModel user = UsuarioModel();
   final _prefs = PreferenciasUsuario();
   String _value = "Usuario general";
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +199,22 @@ class _RegistroPageState extends State<RegistroPage> {
             onPressed: () =>
                 Navigator.pushReplacementNamed(context, LoginPage.routeName),
           ),
+          FlatButton(
+              onPressed: () => handleSignIn().catchError((err) {
+                    Fluttertoast.showToast(msg: "Sign in fail");
+                    this.setState(() {
+                      isLoading = false;
+                    });
+                  }),
+              child: Text(
+                'SIGN IN WITH GOOGLE',
+                style: TextStyle(fontSize: 16.0),
+              ),
+              color: Color(0xffdd4b39),
+              highlightColor: Color(0xffff7f7f),
+              splashColor: Colors.transparent,
+              textColor: Colors.white,
+              padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
           SizedBox(height: 100.0)
         ],
       ),
