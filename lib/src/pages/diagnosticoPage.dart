@@ -69,6 +69,9 @@ class _DiagnosticoPageState extends State<DiagnosticoPage> {
           final registros = snapshot.data;
           return ListView.builder(
             scrollDirection: Axis.vertical,
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 20,
+                bottom: MediaQuery.of(context).size.width / 20),
             shrinkWrap: true,
             itemCount: registros.length,
             itemBuilder: (context, i) => _crearItem(context, registros[i]),

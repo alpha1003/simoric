@@ -23,9 +23,14 @@ class _ContactoPageState extends State<ContactoPage> {
   PreferenciasUsuario _prefs = PreferenciasUsuario();
 
   @override
+  void initState() {
+    bloc.cargarContactos();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size * 1.5;
-    bloc.cargarContactos();
 
     return SafeArea(
         child: Scaffold(
@@ -39,10 +44,7 @@ class _ContactoPageState extends State<ContactoPage> {
             ),
             floatingActionButton: FloatingActionButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => FormContacto()));
+                  Navigator.pushNamed(context, FormContacto.routeName);
                 },
                 child: Icon(Icons.add),
                 backgroundColor: Colors.blueAccent)));
@@ -50,6 +52,7 @@ class _ContactoPageState extends State<ContactoPage> {
 
   Widget _body(LoginBloc bloc) {
     return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -74,13 +77,25 @@ class _ContactoPageState extends State<ContactoPage> {
         if (snapshot.hasData) {
           final contactos = snapshot.data;
           return ListView.builder(
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 20,
+                bottom: MediaQuery.of(context).size.width / 20),
+            physics: const NeverScrollableScrollPhysics(),
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
             itemCount: contactos.length,
             itemBuilder: (context, i) => _crearItem(context, contactos[i]),
           );
         } else {
-          return Center(child: CircularProgressIndicator());
+          return Column(
+            children: [
+              SizedBox(
+                height: 100.0,
+              ),
+              Center(child: CircularProgressIndicator()),
+              Text("Cargando...")
+            ],
+          );
         }
       },
     );

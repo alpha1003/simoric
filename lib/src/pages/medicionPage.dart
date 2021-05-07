@@ -47,6 +47,8 @@ class MedicionPageView extends State<MedicionPage>
   Timer _timer; // timer for image processing
   List<int> _bpmList = <int>[];
   int _bpmFinal = 0;
+  bool _isEnable = false;
+  double _prom;
 
   final firestoreInstance = FirebaseFirestore.instance;
   final _prefs = PreferenciasUsuario();
@@ -190,7 +192,7 @@ class MedicionPageView extends State<MedicionPage>
                             style: TextStyle(fontSize: 18, color: Colors.grey),
                           ),
                           Text(
-                            (_bpmFinal > 0
+                            (_bpmFinal > 30 && _bpmFinal < 150
                                 ? _bpmFinal.toString() + " BPM"
                                 : "--"),
                             style: TextStyle(
@@ -266,11 +268,12 @@ class MedicionPageView extends State<MedicionPage>
       _data.insert(
           0,
           SensorValue(
-              DateTime.fromMillisecondsSinceEpoch(now - i * 1000 ~/ _fs), 128));
+              DateTime.fromMillisecondsSinceEpoch(now - i * 1000 ~/ _fs), 0));
   }
 
   void _toggle() {
     _clearData();
+    _isEnable = true;
     _initController().then((onValue) {
       Wakelock.enable();
       _animationController?.repeat(reverse: true);
@@ -278,9 +281,10 @@ class MedicionPageView extends State<MedicionPage>
         _toggled = true;
       });
       // after is toggled
-      _initTimer();
-      Future.delayed(Duration(seconds: 2));
-      _updateBPM();
+      Future.delayed(Duration(seconds: 3)).then((value) {
+        _initTimer();
+        _updateBPM();
+      });
     });
   }
 
@@ -302,9 +306,9 @@ class MedicionPageView extends State<MedicionPage>
   Future<void> _initController() async {
     try {
       List _cameras = await availableCameras();
-      _controller = CameraController(_cameras.first, ResolutionPreset.medium);
+      _controller = CameraController(_cameras.first, ResolutionPreset.low);
       await _controller.initialize();
-      Future.delayed(Duration(milliseconds: 100)).then((onValue) async {
+      Future.delayed(Duration(milliseconds: 200)).then((onValue) async {
         _controller.setFlashMode(FlashMode.torch);
       });
       _controller.startImageStream((CameraImage image) {
@@ -334,85 +338,68 @@ class MedicionPageView extends State<MedicionPage>
       _data.removeAt(0);
     }
     setState(() {
-      if (_avg > 75 && _avg < 99) {
-        _data.add(SensorValue(_now, _avg));
-        _lastAvg = _avg - 5;
-      } else {
-        _data.add(SensorValue(_now, _lastAvg));
-      }
-      //print("SENSOR: " + _data[30].value.toString());
-      //Los valores varian en un rango de 80 - 85 con el dedo en la cámara -- VERIFICAR
+      _data.add(SensorValue(_now, _avg));
     });
+
+    print("VALOR: " + _data[50].value.toString());
   }
 
   void _updateBPM() async {
-    // Bear in mind that the method used to calculate the BPM is very rudimentar
-    // feel free to improve it :)
-    // Since this function doesn't need to be so "exact" regarding the time it executes,
-    // I only used the a Future.delay to repeat it from time to time.
-    // Ofc you can also use a Timer object to time the callback of this function
-    List<SensorValue> _values;
-    double _avg;
-    int _n;
-    double _m;
-    double _threshold;
-    double _bpm;
-    int _counter;
-    int _previous;
+    SensorValue max1, max2, max3, max4;
+    List<int> listbpm = [];
+    List<SensorValue> _values = [];
+    int bpm;
+
     while (_toggled) {
-      _values = List.from(_data); // create a copy of the current data array
-      _avg = 0;
-      _n = _values.length;
-      _m = 0;
-      _values.forEach((SensorValue value) {
-        _avg += value.value / _n;
-        if (value.value > _m) _m = value.value;
-      });
-      _threshold = (_m + _avg) / 2;
-      _bpm = 0;
-      _counter = 0;
-      _previous = 0;
-      for (int i = 1; i < _n; i++) {
-        if (_values[i - 1].value < _threshold &&
-            _values[i].value > _threshold) {
-          if (_previous != 0) {
-            _counter++;
-            _bpm += 60 *
-                1000 /
-                (_values[i].time.millisecondsSinceEpoch - _previous);
-          }
-          _previous = _values[i].time.millisecondsSinceEpoch;
-        }
-      }
-      if (_counter > 0) {
-        _bpm = _bpm / _counter;
-        print(_bpm);
+      max1 = max2 = max3 = max4 = null;
+      _prom = 0;
+      _values = _data;
+      max1 = valorMaximo(0, 21, _values);
 
-        //setState(() {
-        //  this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
-        //  _bpmList.add(_bpm.toInt());
-        //});
-        this._bpm = ((1 - _alpha) * _bpm + _alpha * _bpm).toInt();
-        _bpmList.add(_bpm.toInt());
-      }
-      // wait for a new set of _data values
+      if (max1.value > 0) {
+        max2 = valorMaximo(21, 42, _values);
+        max3 = valorMaximo(42, 63, _values);
+        max4 = valorMaximo(63, 83, _values);
 
-      if (_bpmList.length > 3) {
-        int sum = 0;
-        _bpmList.forEach((element) {
-          sum = sum + element;
+        bpm = _calcularBPM(max1, max2);
+        listbpm.add(bpm);
+        bpm = _calcularBPM(max2, max3);
+        listbpm.add(bpm);
+        bpm = _calcularBPM(max3, max4);
+        listbpm.add(bpm);
+
+        listbpm.forEach((element) {
+          _prom += element;
         });
-        print("LISTA: " + _bpmList.toString());
+
+        _prom = (_prom / 3);
+
         setState(() {
-          _bpmFinal = (sum ~/ 4);
-          print(_bpm);
-          _untoggle();
-          _bpmList.clear();
+          _bpmFinal = _prom.toInt();
+          _prom = 0;
+          listbpm.clear();
         });
       }
 
-      await Future.delayed(Duration(milliseconds: 500 * _windowLen ~/ _fs));
+      await Future.delayed(Duration(milliseconds: 1000 * _windowLen ~/ _fs));
     }
+  }
+
+  SensorValue valorMaximo(int inicio, int fin, List<SensorValue> list) {
+    SensorValue max = SensorValue(_now, 0);
+
+    for (int i = inicio; i < fin; i++) {
+      if (list[i].value > max.value) max = list[i];
+    }
+
+    return max;
+  }
+
+  int _calcularBPM(SensorValue s1, SensorValue s2) {
+    int diferencia =
+        s2.time.millisecondsSinceEpoch - s1.time.millisecondsSinceEpoch;
+    int bpm = (60000 ~/ diferencia);
+    return bpm;
   }
 
   void _preguntar(BuildContext c) {
@@ -426,7 +413,7 @@ class MedicionPageView extends State<MedicionPage>
               onPressed: () => Navigator.of(context).pop(), child: Text("No")),
           TextButton(
               child: Text("Sí"),
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
                 _guardarRegistro().whenComplete(() {
                   utils.mostrarAlerta(c, "Se ha guardado el registro", "Aviso");
@@ -500,6 +487,30 @@ class MedicionPageView extends State<MedicionPage>
             },
           );
         });
+  }
+
+  Future<Widget> _preguntarEstado(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) {
+            return AlertDialog(
+              content: ListView(
+                children: [],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _crearEstado(String estado) {
+    return ListTile(
+      key: UniqueKey(),
+      title: Text(estado),
+    );
   }
 
   Widget _listaContactos(BuildContext context, Function setState) {
@@ -584,9 +595,5 @@ class MedicionPageView extends State<MedicionPage>
     print(res.toString());
 
     return res;
-  }
-
-  void _salir() {
-    Navigator.of(context).pop();
   }
 }

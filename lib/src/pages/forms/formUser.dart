@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:simoric/src/models/contactModel.dart';
+import 'package:simoric/src/models/usuarioModel.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:simoric/src/provider/contactosProvider.dart';
+import 'package:simoric/src/provider/usuarioProvider.dart';
 import 'package:simoric/src/utils/utils.dart' as utils;
 
-class FormContacto extends StatefulWidget {
+class FormUser extends StatefulWidget {
   @override
-  _FormContactoState createState() => _FormContactoState();
+  _FormUserState createState() => _FormUserState();
 
-  static final String routeName = "contactForm";
+  static final String routeName = "userForm";
 }
 
-class _FormContactoState extends State<FormContacto> {
+class _FormUserState extends State<FormUser> {
   final formKey = GlobalKey<FormState>();
-  ContactModel contact = new ContactModel();
+  UsuarioModel _usuarioModel = new UsuarioModel();
+  UsuarioProvider _usuarioProvider = UsuarioProvider();
   ContactoProvider contactoProvider = ContactoProvider();
   PreferenciasUsuario _prefs = PreferenciasUsuario();
+  String _tipo = "Usuario general";
+  List<DropdownMenuItem<String>> lista = [
+    DropdownMenuItem(value: "Medico", child: Text("Medico")),
+    DropdownMenuItem(value: "Paciente", child: Text("Paciente")),
+    DropdownMenuItem(value: "Usuario general", child: Text("Usuario general")),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    _usuarioModel = ModalRoute.of(context).settings.arguments;
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(
@@ -96,8 +106,9 @@ class _FormContactoState extends State<FormContacto> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
+                                        initialValue: _usuarioModel.name,
                                         onSaved: (value) =>
-                                            contact.name = value,
+                                            _usuarioModel.name = value,
                                         validator: (String value) =>
                                             (value.isEmpty)
                                                 ? "Ingrese un nombre"
@@ -114,7 +125,7 @@ class _FormContactoState extends State<FormContacto> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
                                         onSaved: (value) =>
-                                            contact.lastName = value,
+                                            _usuarioModel.lastname = value,
                                         validator: (String value) =>
                                             (value.isEmpty)
                                                 ? "Ingrese un apellido"
@@ -130,15 +141,14 @@ class _FormContactoState extends State<FormContacto> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
-                                        onSaved: (value) =>
-                                            contact.email = value,
+                                        onSaved: (value) => _usuarioModel.age =
+                                            int.parse(value),
                                         validator: (String value) =>
-                                            (value.isEmpty)
-                                                ? "Ingrese un correo"
+                                            (!utils.isNumeric(value))
+                                                ? "Ingrese un número válido"
                                                 : null,
                                         decoration: InputDecoration(
-                                          labelText:
-                                              "Correo; example@correo.com",
+                                          labelText: "Edad",
                                           border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(20.0)),
@@ -148,7 +158,7 @@ class _FormContactoState extends State<FormContacto> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
-                                        onSaved: (value) => contact
+                                        onSaved: (value) => _usuarioModel
                                             .phoneNumber = int.parse(value),
                                         validator: (String value) {
                                           if (value.isEmpty) {
@@ -169,6 +179,7 @@ class _FormContactoState extends State<FormContacto> {
                                         ),
                                       ),
                                     ),
+                                    _crearTipo(),
                                     Padding(
                                       padding: const EdgeInsets.all(30.0),
                                       child: RaisedButton(
@@ -195,7 +206,7 @@ class _FormContactoState extends State<FormContacto> {
                                                 minHeight: 50.0),
                                             alignment: Alignment.center,
                                             child: Text(
-                                              "Registrar",
+                                              "Guardar",
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                   color: Colors.white),
@@ -218,19 +229,39 @@ class _FormContactoState extends State<FormContacto> {
   }
 
   void _validar(BuildContext c) async {
-    if (!formKey.currentState.validate()) {
+    if (!formKey.currentState.validate() || _usuarioModel.rol == "rol") {
       return;
     } else {
       formKey.currentState.save();
-      final res = await contactoProvider.crearContacto(contact, _prefs.idUser);
-
+      final res = await _usuarioProvider.actualizarUsuario(_usuarioModel);
       if (res == "OK") {
-        utils.mostrarAlerta(c, "Se ha creado con éxito el contacto", "Mensaje");
+        utils.mostrarAlerta(c, "Se ha actualizado la informacion", "Mensaje");
         Future.delayed(Duration(seconds: 2))
             .then((value) => Navigator.of(context).pop());
       } else {
         utils.mostrarAlerta(c, res, "Error");
       }
     }
+  }
+
+  Widget _crearTipo() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Text("Tipo de usuario"),
+        DropdownButton<String>(
+          items: lista,
+          value: _tipo,
+          elevation: 2,
+          icon: Icon(Icons.person_outline, color: Colors.lightGreen),
+          onChanged: (String value) {
+            _tipo = value;
+            setState(() {
+              _usuarioModel.rol = _tipo;
+            });
+          },
+        ),
+      ],
+    );
   }
 }

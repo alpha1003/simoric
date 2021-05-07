@@ -39,6 +39,19 @@ class UsuarioProvider {
     return res;
   }
 
+  Future<String> actualizarUsuario(UsuarioModel model) async {
+    try {
+      await firestoreInstance
+          .collection("users")
+          .doc(_prefs.idUser)
+          .set(model.toJson());
+
+      return "OK";
+    } on FirebaseAuthException catch (e) {
+      return e.message;
+    }
+  }
+
   Future<UsuarioModel> buscarUsuario(String uid) async {
     UsuarioModel model;
     await firestoreInstance
@@ -54,7 +67,6 @@ class UsuarioProvider {
     try {
       final res =
           await _auth.signInWithEmailAndPassword(email: mail, password: passwd);
-
       return res;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:simoric/routes.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
 
 import 'package:simoric/src/bloc/provider.dart';
 import 'package:simoric/src/pages/constant.dart';
@@ -20,6 +21,7 @@ void main() async {
   await _prefs.initPrefs();
   await Firebase.initializeApp();
   final _auth = FirebaseAuth.instance;
+  LoginBloc _bloc = LoginBloc();
 
   _auth.authStateChanges().listen((User user) {
     if (user == null) {
@@ -28,6 +30,8 @@ void main() async {
     } else {
       print('User is signed in!');
       print(_auth.currentUser);
+      _prefs.idUser = _auth.currentUser.uid;
+      _bloc.cargarUsuario();
       _prefs.inicioPage = HomePage.routeName;
     }
   });

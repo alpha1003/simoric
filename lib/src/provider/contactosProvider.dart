@@ -18,14 +18,18 @@ class ContactoProvider {
   final fb = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<DocumentReference> crearContacto(
-      ContactModel contact, String uId) async {
-    var res = await firestoreInstance
-        .collection("users")
-        .doc(uId)
-        .collection("contactos")
-        .add(contact.toJson());
-    return res;
+  Future crearContacto(ContactModel contact, String uId) async {
+    try {
+      await firestoreInstance
+          .collection("users")
+          .doc(uId)
+          .collection("contactos")
+          .add(contact.toJson());
+
+      return "OK";
+    } on FirebaseAuthException catch (e) {
+      return e.message;
+    }
   }
 
   Future<List<ContactModel>> cargarContactos(String uId) async {

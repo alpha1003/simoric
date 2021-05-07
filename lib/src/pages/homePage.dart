@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:simoric/src/bloc/login_bloc.dart';
+import 'package:simoric/src/models/usuarioModel.dart';
 import 'package:simoric/src/pages/contactosPage.dart';
 import 'package:simoric/src/pages/diagnosticoPage.dart';
 import 'package:simoric/src/pages/inicioPage.dart';
 import 'package:simoric/src/pages/recomendacionesPage.dart';
+import 'package:simoric/src/utils/utils.dart' as utils;
 
 class HomePage extends StatefulWidget {
   static final String routeName = "homePage";
@@ -11,10 +14,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  UsuarioModel user = UsuarioModel();
+  LoginBloc bloc = LoginBloc();
+
   int _currentIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    bloc.cargarUsuario();
+    user = bloc.user;
+    if (user != null) user = ModalRoute.of(context).settings.arguments;
+
     return Scaffold(
       body: _selectPage(_currentIndex),
       bottomNavigationBar: navigationBar(),

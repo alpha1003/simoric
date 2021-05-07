@@ -14,10 +14,9 @@ class Chart extends StatelessWidget {
         colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
         domainFn: (SensorValue values, _) => values.time,
         measureFn: (SensorValue values, _) => values.value,
+        displayName: "Gráfico de pulsasiones",
         data: _data,
         areaColorFn: (_, __) => charts.MaterialPalette.gray.shade300,
-        
-        
       )
     ],
         animate: false,

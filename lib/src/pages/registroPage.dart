@@ -24,7 +24,6 @@ class RegistroPage extends StatefulWidget {
 class _RegistroPageState extends State<RegistroPage> {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final auth.FirebaseAuth firebaseAuth = auth.FirebaseAuth.instance;
-  SharedPreferences prefs;
 
   bool isLoading = false;
   bool isLoggedIn = false;
@@ -41,8 +40,6 @@ class _RegistroPageState extends State<RegistroPage> {
       isLoading = true;
     });
 
-    prefs = await SharedPreferences.getInstance();
-
     isLoggedIn = await googleSignIn.isSignedIn();
     if (isLoggedIn) {
       Navigator.pushNamed(context, HomePage.routeName);
@@ -54,8 +51,6 @@ class _RegistroPageState extends State<RegistroPage> {
   }
 
   Future<Null> handleSignIn() async {
-    prefs = await SharedPreferences.getInstance();
-
     this.setState(() {
       isLoading = true;
     });
@@ -89,6 +84,7 @@ class _RegistroPageState extends State<RegistroPage> {
           'lastname': "lastname",
           'email': firebaseUser.email,
           'age': 1,
+          'rol': "rol",
           'phoneNumber': 1,
           'photoUrl': firebaseUser.photoURL,
           'id': firebaseUser.uid,
@@ -101,15 +97,13 @@ class _RegistroPageState extends State<RegistroPage> {
 
         // Write data to local
         currentUser = firebaseUser;
-        await prefs.setString('id', currentUser.uid);
-        await prefs.setString('nickname', currentUser.displayName);
-        await prefs.setString('photoUrl', currentUser.photoURL);
+        _prefs.picUrl = currentUser.photoURL;
       } else {
         // Write data to local
-        await prefs.setString('id', documents[0].data()['id']);
-        await prefs.setString('nickname', documents[0].data()['nickname']);
-        await prefs.setString('photoUrl', documents[0].data()['photoUrl']);
-        await prefs.setString('aboutMe', documents[0].data()['aboutMe']);
+        _prefs.idUser = firebaseUser.uid;
+        _prefs.picUrl = firebaseUser.photoURL;
+        _prefs.nombre = firebaseUser.displayName;
+        currentUser = firebaseUser;
       }
       Fluttertoast.showToast(msg: "Sign in success");
       this.setState(() {
@@ -135,12 +129,33 @@ class _RegistroPageState extends State<RegistroPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Stack(
-      children: <Widget>[
-        _crearFondo(context),
-        _loginForm(context),
-      ],
-    ));
+        body: isLoading
+            ? SafeArea(
+                child: Center(
+                    heightFactor: 100.0,
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 250.0,
+                        ),
+                        CircularProgressIndicator(),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        Text("Cargando..."),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        Text("Please wait")
+                      ],
+                    )),
+              )
+            : Stack(
+                children: <Widget>[
+                  _crearFondo(context),
+                  _loginForm(context),
+                ],
+              ));
   }
 
   Widget _loginForm(BuildContext context) {

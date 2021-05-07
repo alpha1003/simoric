@@ -15,11 +15,27 @@
       },
       "oauth_client": [
         {
+          "client_id": "775692371122-61vmt7adnlhajl0iap4i5hrkfqachg0b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.simoric_project.martin",
+            "certificate_hash": "24938d3de3b7e22cfe1b2eaa78daeaab3d892e6f"
+          }
+        },
+        {
           "client_id": "775692371122-h1208chkukjji0cav3ojvrotvgbfkkjj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.simoric_project.martin",
             "certificate_hash": "a3665c5a6876dd73d701a6a4e43e1301d9c72665"
+          }
+        },
+        {
+          "client_id": "775692371122-n9hieve96e57g5a5vcmvrjnat3h8jl21.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.simoric_project.martin",
+            "certificate_hash": "26558238b06347c081d9b7539c7cbf9bad3180a7"
           }
         },
         {
@@ -36,7 +52,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "775692371122-c5n4re4picq24ioki88tsmlvjtmg9n6s.apps.googleusercontent.com",
+              "client_id": "775692371122-85r2fo6rf9vd5595d81alcvedkmrmk6m.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

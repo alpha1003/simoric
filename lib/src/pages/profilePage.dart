@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_image/network.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simoric/src/models/usuarioModel.dart';
+import 'package:simoric/src/pages/forms/formUser.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/provider/usuarioProvider.dart';
 
 class ProfilePage extends StatelessWidget {
   static final String routeName = "profilePage";
+  PreferenciasUsuario _prefs = PreferenciasUsuario();
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +49,18 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         Container(
-          width: 100.0,
-          height: 100.0,
+          width: 200.0,
+          height: 200.0,
           margin: EdgeInsets.symmetric(horizontal: 170.0, vertical: 80.0),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(100.0)),
-          child: Image(
-            image: AssetImage("assets/profile-picture.jpg"),
-            fit: BoxFit.fill,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(200.0)),
+          child: FadeInImage(
+            placeholder: AssetImage("assets/profile-picture.jpg"),
+            image: NetworkImage(_prefs.picUrl),
+            fit: BoxFit.contain,
+            //child: Image(
+            //  image: NetworkImage(prefs.get("photoUrl")),
+            //  fit: BoxFit.fill,
+            //),
           ),
         ),
       ],
@@ -102,13 +111,17 @@ class ProfilePage extends StatelessWidget {
                 Text('TELEFONO', style: TextStyle(fontSize: 20.0)),
                 SizedBox(height: 10.0),
                 Text(user.phoneNumber.toString()),
+                Text('ROL', style: TextStyle(fontSize: 20.0)),
+                SizedBox(height: 10.0),
+                Text(user.rol),
               ],
             ),
           ),
           FlatButton(
               child: Text("Editar Informacion"),
               color: Colors.greenAccent.shade200,
-              onPressed: () {}),
+              onPressed: () => Navigator.pushNamed(context, FormUser.routeName,
+                  arguments: user)),
         ],
       ),
     );

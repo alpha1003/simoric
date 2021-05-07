@@ -73,4 +73,12 @@ class PreferenciasUsuario {
   set first(bool value) {
     _prefs.setBool('first', value);
   }
+
+  get picUrl {
+    return _prefs.getString('picUrl') ?? "";
+  }
+
+  set picUrl(String value) {
+    _prefs.setString('picUrl', value);
+  }
 }

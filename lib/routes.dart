@@ -1,9 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:simoric/src/pages/contactosPage.dart';
+import 'package:simoric/src/pages/forms/formUser.dart';
 import 'package:simoric/src/pages/homePage.dart';
 import 'package:simoric/src/pages/login_page.dart';
 import 'package:simoric/src/pages/medicionPage.dart';
 import 'package:simoric/src/pages/profilePage.dart';
+import 'package:simoric/src/pages/forms/formContact.dart';
 import 'package:simoric/src/pages/recomendacionesPage.dart';
 import 'package:simoric/src/pages/registroPage.dart';
 import 'package:simoric/src/screens/splash/splash_screen.dart';
@@ -19,5 +21,7 @@ final Map<String, WidgetBuilder> routes = {
   ContactoPage.routeName: (BuildContext context) => ContactoPage(),
   RecomendacionesPage.routeName: (BuildContext context) =>
       RecomendacionesPage(),
-  ProfilePage.routeName: (BuildContext context) => ProfilePage()
+  ProfilePage.routeName: (BuildContext context) => ProfilePage(),
+  FormContacto.routeName: (BuildContext context) => FormContacto(),
+  FormUser.routeName: (BuildContext context) => FormUser()
 };
