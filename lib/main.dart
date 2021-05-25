@@ -53,13 +53,6 @@ class _MyAppState extends State<MyApp> {
       _prefs.inicioPage = SplashScreen.routeName;
       _prefs.first = false;
     }
-    //else {
-    //  if (_prefs.idUser != "") {
-    //    _prefs.inicioPage = HomePage.routeName;
-    //  } else {
-    //    _prefs.inicioPage = LoginPage.routeName;
-    //  }
-    //}
 
     return Provider(
       child: MaterialApp(

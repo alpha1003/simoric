@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:simoric/src/bloc/login_bloc.dart';
+import 'package:simoric/constants.dart';
 import 'package:simoric/src/models/usuarioModel.dart';
 import 'package:simoric/src/pages/contactosPage.dart';
+import 'package:simoric/src/pages/conversation.dart';
 import 'package:simoric/src/pages/diagnosticoPage.dart';
 import 'package:simoric/src/pages/inicioPage.dart';
+import 'package:simoric/src/pages/medicoPage.dart';
 import 'package:simoric/src/pages/recomendacionesPage.dart';
+import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/utils/utils.dart' as utils;
 
 class HomePage extends StatefulWidget {
@@ -16,6 +20,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   UsuarioModel user = UsuarioModel();
   LoginBloc bloc = LoginBloc();
+
+  final _prefs = PreferenciasUsuario();
 
   int _currentIndex = 0;
 
@@ -39,13 +45,15 @@ class _HomePageState extends State<HomePage> {
   Widget _selectPage(int val) {
     switch (val) {
       case 0:
-        return InicioPage();
+        return MedicoPage();
       case 1:
         return DiagnosticoPage();
       case 2:
         return ContactoPage();
       case 3:
         return RecomendacionesPage();
+      case 4:
+        return ConversationPage(currentUserId: _prefs.idUser);
     }
   }
 
@@ -61,16 +69,7 @@ class _HomePageState extends State<HomePage> {
           _currentIndex = i;
         });
       },
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: "Inicio",
-        ),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.fingerprint), label: "Medicion"),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: "Contactos"),
-        BottomNavigationBarItem(icon: Icon(Icons.healing), label: "Cuidados"),
-      ],
+      items: menuItems,
       currentIndex: _currentIndex,
     );
   }

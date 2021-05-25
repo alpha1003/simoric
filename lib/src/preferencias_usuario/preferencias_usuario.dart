@@ -81,4 +81,12 @@ class PreferenciasUsuario {
   set picUrl(String value) {
     _prefs.setString('picUrl', value);
   }
+
+  get userRol {
+    return _prefs.getString('userRol') ?? "";
+  }
+
+  set userRol(String value) {
+    _prefs.setString('userRol', value);
+  }
 }

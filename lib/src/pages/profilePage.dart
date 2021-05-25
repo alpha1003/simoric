@@ -49,18 +49,20 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         Container(
-          width: 200.0,
-          height: 200.0,
+          width: 150.0,
+          height: 150.0,
           margin: EdgeInsets.symmetric(horizontal: 170.0, vertical: 80.0),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(200.0)),
-          child: FadeInImage(
-            placeholder: AssetImage("assets/profile-picture.jpg"),
-            image: NetworkImage(_prefs.picUrl),
-            fit: BoxFit.contain,
-            //child: Image(
-            //  image: NetworkImage(prefs.get("photoUrl")),
-            //  fit: BoxFit.fill,
-            //),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(150),
+            child: FadeInImage(
+              placeholder: AssetImage("assets/profile-picture.jpg"),
+              image: NetworkImage(_prefs.picUrl),
+              fit: BoxFit.fill,
+              //child: Image(
+              //  image: NetworkImage(prefs.get("photoUrl")),
+              //  fit: BoxFit.fill,
+              //),
+            ),
           ),
         ),
       ],

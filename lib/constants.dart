@@ -49,3 +49,24 @@ OutlineInputBorder outlineInputBorder() {
     borderSide: BorderSide(color: kTextColor),
   );
 }
+
+final List<BottomNavigationBarItem> menuItems = [
+  BottomNavigationBarItem(
+    icon: Icon(Icons.home),
+    label: "Inicio",
+  ),
+  BottomNavigationBarItem(icon: Icon(Icons.fingerprint), label: "Medicion"),
+  BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: "Contactos"),
+  BottomNavigationBarItem(icon: Icon(Icons.healing), label: "Cuidados"),
+  BottomNavigationBarItem(icon: Icon(Icons.messenger_outline), label: "Chat")
+];
+
+final List<BottomNavigationBarItem> menuItems2 = [
+  BottomNavigationBarItem(
+    icon: Icon(Icons.home),
+    label: "Inicio",
+  ),
+  BottomNavigationBarItem(icon: Icon(Icons.fingerprint), label: "Medicion"),
+  BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: "Contactos"),
+  BottomNavigationBarItem(icon: Icon(Icons.messenger_outline), label: "Chat")
+];

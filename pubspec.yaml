@@ -13,20 +13,26 @@ dependencies:
     git:
       url: https://github.com/Renesanse/plugins.git
       path: packages/camera/camera
+  cached_network_image: any
   charts_flutter: ^0.9.0
   cloud_firestore: any
   cupertino_icons: ^0.1.2
   firebase_auth: ^0.18.1+2
   firebase_core: ^0.5.0+1
   firebase_database: ^4.1.1
+  firebase_messaging: any
+  firebase_storage: any
   flutter_image: ^3.0.0
+  flutter_local_notifications: any
   flutter_svg: ^0.19.0
   flutter_swiper: ^1.1.6
   fluttertoast: any
   google_sign_in: any
   http: null
+  image_picker: any
   intl: any
   path_provider: ^1.6.18
+  photo_view: any
   responsive_framework: ^0.0.8
   rxdart: ^0.24.1
   shared_preferences: null
@@ -49,6 +55,7 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
+    - images/
     - assets/
     - assets/emojis/
     - assets/iconos/
