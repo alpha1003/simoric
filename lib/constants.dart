@@ -66,7 +66,5 @@ final List<BottomNavigationBarItem> menuItems2 = [
     icon: Icon(Icons.home),
     label: "Inicio",
   ),
-  BottomNavigationBarItem(icon: Icon(Icons.fingerprint), label: "Medicion"),
-  BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: "Contactos"),
   BottomNavigationBarItem(icon: Icon(Icons.messenger_outline), label: "Chat")
 ];

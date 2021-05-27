@@ -23,18 +23,26 @@ void main() async {
   final _auth = FirebaseAuth.instance;
   LoginBloc _bloc = LoginBloc();
 
-  _auth.authStateChanges().listen((User user) {
-    if (user == null) {
-      print('User is currently signed out!');
-      _prefs.inicioPage = SplashScreen.routeName;
-    } else {
-      print('User is signed in!');
-      print(_auth.currentUser);
-      _prefs.idUser = _auth.currentUser.uid;
-      _bloc.cargarUsuario();
-      _prefs.inicioPage = HomePage.routeName;
-    }
-  });
+  if (_prefs.idUser == "") {
+    print('User is currently signed out!');
+    _prefs.inicioPage = SplashScreen.routeName;
+  } else {
+    _bloc.cargarUsuario();
+    _prefs.inicioPage = HomePage.routeName;
+  }
+
+  //_auth.authStateChanges().listen((User user) {
+  //  if (user == null) {
+  //    print('User is currently signed out!');
+  //    _prefs.inicioPage = SplashScreen.routeName;
+  //  } else {
+  //    print('User is signed in!');
+  //    print(_auth.currentUser);
+  //    _prefs.idUser = _auth.currentUser.uid;
+  //    _bloc.cargarUsuario();
+  //    _prefs.inicioPage = HomePage.routeName;
+  //  }
+  //});
 
   runApp(MyApp());
 }

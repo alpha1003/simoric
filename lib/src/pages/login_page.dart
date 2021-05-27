@@ -24,8 +24,10 @@ class _LoginPageState extends State<LoginPage> {
   final UsuarioProvider usuarioProvider = new UsuarioProvider();
 
   final _prefs = PreferenciasUsuario();
+  final _formkey = GlobalKey<FormState>();
+  String _value = "Usuario general";
 
-  UsuarioModel _modelUser;
+  UsuarioModel _modelUser = UsuarioModel();
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final auth.FirebaseAuth firebaseAuth = auth.FirebaseAuth.instance;
@@ -75,33 +77,44 @@ class _LoginPageState extends State<LoginPage> {
       // Check is already sign up
       final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('users')
-          .where('id', isEqualTo: firebaseUser.uid)
+          .where('uid', isEqualTo: firebaseUser.uid)
           .get();
 
       final List<DocumentSnapshot> documents = result.docs;
+
       if (documents.length == 0) {
         // Update data to server if new user
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(firebaseUser.uid)
-            .set({
-          'name': firebaseUser.displayName,
-          'lastname': "lastname",
-          'email': firebaseUser.email,
-          'age': 1,
-          'rol': "rol",
-          'phoneNumber': 1,
-          'photoUrl': firebaseUser.photoURL,
-          'id': firebaseUser.uid,
-          'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-          'chattingWith': null
-        });
+        var ln = firebaseUser.displayName.split(" ");
+        _modelUser.lastname = ln[1];
+        _modelUser.name = ln[0];
+        _modelUser.photoUrl = firebaseUser.photoURL;
+        _modelUser.uid = firebaseUser.uid;
+        _modelUser.email = firebaseUser.email;
+        _prefs.idUser = firebaseUser.uid;
+        await preguntar(context);
+        await usuarioProvider.actualizarUsuario(_modelUser);
+
+        //await FirebaseFirestore.instance
+        //    .collection('users')
+        //    .doc(firebaseUser.uid)
+        //    .set({
+        //  'name': firebaseUser.displayName,
+        //  'lastname': "lastname",
+        //  'email': firebaseUser.email,
+        //  'age': 1,
+        //  'rol': "rol",
+        //  'phoneNumber': 1,
+        //  'photoUrl': firebaseUser.photoURL,
+        //  'id': firebaseUser.uid,
+        //  'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
+        //  'chattingWith': null
+        //});
 
         _prefs.nombre = firebaseUser.displayName;
         _prefs.idUser = firebaseUser.uid;
         currentUser = firebaseUser;
         _prefs.picUrl = currentUser.photoURL;
-        _modelUser = await usuarioProvider.buscarUsuario(_prefs.idUser);
+        //_modelUser = await usuarioProvider.buscarUsuario(_prefs.idUser);
       } else {
         // Write data to local
         _prefs.idUser = firebaseUser.uid;
@@ -128,12 +141,27 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Stack(
-      children: <Widget>[
-        _crearFondo(context),
-        _loginForm(context),
-      ],
-    ));
+        body: isLoading
+            ? Center(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 400.0,
+                    ),
+                    CircularProgressIndicator(),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Text("Por favor espere"),
+                  ],
+                ),
+              )
+            : Stack(
+                children: <Widget>[
+                  _crearFondo(context),
+                  _loginForm(context),
+                ],
+              ));
   }
 
   Widget _loginForm(BuildContext context) {
@@ -197,8 +225,8 @@ class _LoginPageState extends State<LoginPage> {
           ),
           FlatButton(
               child: Text("Entrar como invitado"),
-              onPressed: () =>
-                  _googleLogin() //Navigator.pushReplacementNamed(context, HomePage.routeName),
+              onPressed: () => preguntar(
+                  context) //Navigator.pushReplacementNamed(context, HomePage.routeName),
               ),
           SizedBox(height: 100.0)
         ],
@@ -358,5 +386,110 @@ class _LoginPageState extends State<LoginPage> {
     final firebaseUser = (await _auth.signInWithCredential(credential)).user;
 
     return firebaseUser;
+  }
+
+  Future preguntar(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context1, setState) {
+            return AlertDialog(
+              content: _dialogo2(context1),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _dialogo2(BuildContext context) {
+    return Form(
+      key: _formkey,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          children: [
+            Text("Unos datos más"),
+            SizedBox(
+              height: 15.0,
+            ),
+            TextFormField(
+              onSaved: (val) => _modelUser.age = int.parse(val),
+              validator: (value) {
+                return (utils.isNumeric(value)) ? null : "No es válido";
+              },
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Edad",
+              ),
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            TextFormField(
+              onSaved: (val) => _modelUser.phoneNumber = int.parse(val),
+              validator: (value) {
+                return (utils.isNumeric(value)) ? null : "No es válido";
+              },
+              decoration: InputDecoration(labelText: "Telefono"),
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            _crearTipo(),
+            SizedBox(
+              height: 10.0,
+            ),
+            FlatButton(
+              color: Colors.blue,
+              child: Text("Guardar"),
+              onPressed: () {
+                if (_formkey.currentState.validate()) {
+                  _formkey.currentState.save();
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _crearTipo() {
+    List<DropdownMenuItem<String>> lista = [
+      DropdownMenuItem(value: "Medico", child: Text("Medico")),
+      DropdownMenuItem(value: "Paciente", child: Text("Paciente")),
+      DropdownMenuItem(
+          value: "Usuario general", child: Text("Usuario general")),
+    ];
+
+    return StatefulBuilder(
+      builder: (BuildContext context, setState) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text("Tipo de usuario:"),
+            SizedBox(
+              width: 5.0,
+            ),
+            DropdownButton<String>(
+              items: lista,
+              value: _value,
+              elevation: 2,
+              icon: Icon(Icons.person_outline, color: Colors.lightGreen),
+              onChanged: (String value) {
+                _value = value;
+                _modelUser.rol = _value;
+                setState(() {
+                  print(_value);
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

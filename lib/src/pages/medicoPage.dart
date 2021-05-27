@@ -9,7 +9,7 @@ class MedicoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: DefaultTabController(
-        initialIndex: 1,
+        initialIndex: 0,
         length: 2,
         child: Scaffold(
           appBar: AppBar(
@@ -231,6 +231,9 @@ class MedicoPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text("Martín Burgos"),
+                    SizedBox(
+                      height: 10.0,
+                    ),
                   ],
                 ),
               ),

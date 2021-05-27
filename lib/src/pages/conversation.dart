@@ -12,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:simoric/src/pages/widgets/loading.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
+import 'package:simoric/src/provider/usuarioProvider.dart';
 
 import '../../const.dart';
 import '../../main.dart';
@@ -20,6 +21,7 @@ import 'chatPage.dart';
 class ConversationPage extends StatefulWidget {
   final String currentUserId;
   static final routeName = "conversationPage";
+  UsuarioProvider _usuarioProvider = UsuarioProvider();
 
   ConversationPage({Key key, @required this.currentUserId}) : super(key: key);
 
@@ -38,8 +40,8 @@ class ConversationPageState extends State<ConversationPage> {
   final ScrollController listScrollController = ScrollController();
   final _prefs = PreferenciasUsuario();
 
-  int _limit = 20;
-  int _limitIncrement = 20;
+  int _limit = 10;
+  int _limitIncrement = 10;
   bool isLoading = false;
   List<Choice> choices = const <Choice>[
     const Choice(title: 'Settings', icon: Icons.settings),
@@ -293,8 +295,7 @@ class ConversationPageState extends State<ConversationPage> {
               Container(
                 child: StreamBuilder(
                   stream: FirebaseFirestore.instance
-                      .collection('messages')
-                      .where("id", arrayContains: [_prefs.idUser])
+                      .collection('users')
                       .limit(_limit)
                       .snapshots(),
                   builder: (context, snapshot) {
@@ -369,20 +370,20 @@ class ConversationPageState extends State<ConversationPage> {
                     children: <Widget>[
                       Container(
                         child: Text(
-                          'Nickname: ${document.data()['nickname']}',
+                          document.data()['name'],
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                       ),
-                      Container(
-                        child: Text(
-                          'About me: ${document.data()['aboutMe'] ?? 'Not available'}',
-                          style: TextStyle(color: primaryColor),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                      )
+                      //Container(
+                      //  child: Text(
+                      //    'About me: ${document.data()['aboutMe'] ?? 'Not available'}',
+                      //    style: TextStyle(color: primaryColor),
+                      //  ),
+                      //  alignment: Alignment.centerLeft,
+                      //  margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                      //)
                     ],
                   ),
                   margin: EdgeInsets.only(left: 20.0),
@@ -407,6 +408,10 @@ class ConversationPageState extends State<ConversationPage> {
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
     }
+  }
+
+  Stream buscarChats() {
+    List<String> lista;
   }
 }
 

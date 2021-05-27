@@ -90,6 +90,7 @@ class MainDrawer extends StatelessWidget {
             await FirebaseAuth.instance.signOut();
             await googleSignIn.disconnect();
             await googleSignIn.signOut();
+            _prefs.idUser = "";
 
             Navigator.of(context)
                 .pushNamedAndRemoveUntil(LoginPage.routeName, (route) => false);

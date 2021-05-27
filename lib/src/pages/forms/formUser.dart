@@ -35,7 +35,7 @@ class _FormUserState extends State<FormUser> {
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(
-              title: const Text("Contactos"),
+              title: const Text("Perfil"),
               flexibleSpace: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(begin: Alignment.center, colors: [
@@ -124,6 +124,7 @@ class _FormUserState extends State<FormUser> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
+                                        initialValue: _usuarioModel.lastname,
                                         onSaved: (value) =>
                                             _usuarioModel.lastname = value,
                                         validator: (String value) =>
@@ -141,6 +142,10 @@ class _FormUserState extends State<FormUser> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
+                                        initialValue:
+                                            (_usuarioModel.age != null)
+                                                ? _usuarioModel.age.toString()
+                                                : null,
                                         onSaved: (value) => _usuarioModel.age =
                                             int.parse(value),
                                         validator: (String value) =>
@@ -158,6 +163,11 @@ class _FormUserState extends State<FormUser> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextFormField(
+                                        initialValue:
+                                            (_usuarioModel.phoneNumber != null)
+                                                ? _usuarioModel.phoneNumber
+                                                    .toString()
+                                                : null,
                                         onSaved: (value) => _usuarioModel
                                             .phoneNumber = int.parse(value),
                                         validator: (String value) {

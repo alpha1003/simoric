@@ -77,6 +77,7 @@ class LoginBloc with Validators {
     if (_userController.value == null) {
       final user = await _usuarioProvider.buscarUsuario(_prefs.idUser);
       _userController.sink.add(user);
+      _prefs.userRol = user.rol;
     }
   }
 }

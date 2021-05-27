@@ -32,12 +32,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    bloc.cargarUsuario();
     user = bloc.user;
+
     if (user != null) user = ModalRoute.of(context).settings.arguments;
 
     return Scaffold(
-      body: _selectPage(_currentIndex),
+      body: (_prefs.userRol == "Medico")
+          ? _selectPage2(_currentIndex)
+          : _selectPage(_currentIndex),
       bottomNavigationBar: navigationBar(),
     );
   }
@@ -45,7 +47,7 @@ class _HomePageState extends State<HomePage> {
   Widget _selectPage(int val) {
     switch (val) {
       case 0:
-        return MedicoPage();
+        return InicioPage();
       case 1:
         return DiagnosticoPage();
       case 2:
@@ -53,6 +55,15 @@ class _HomePageState extends State<HomePage> {
       case 3:
         return RecomendacionesPage();
       case 4:
+        return ConversationPage(currentUserId: _prefs.idUser);
+    }
+  }
+
+  Widget _selectPage2(int val) {
+    switch (val) {
+      case 0:
+        return MedicoPage();
+      case 1:
         return ConversationPage(currentUserId: _prefs.idUser);
     }
   }
@@ -69,7 +80,7 @@ class _HomePageState extends State<HomePage> {
           _currentIndex = i;
         });
       },
-      items: menuItems,
+      items: (_prefs.userRol == "Medico") ? menuItems2 : menuItems,
       currentIndex: _currentIndex,
     );
   }

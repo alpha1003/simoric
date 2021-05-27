@@ -18,15 +18,19 @@ class UsuarioModel {
     this.phoneNumber,
     this.medUid,
     this.email,
+    this.photoUrl,
+    this.uid,
   });
 
   String name;
+  String uid;
   String lastname;
   String rol;
   String medUid;
   int age;
   int phoneNumber;
   String email;
+  String photoUrl;
 
   factory UsuarioModel.fromJson(Map<String, dynamic> json) => UsuarioModel(
         name: json["name"],
@@ -36,6 +40,8 @@ class UsuarioModel {
         age: json["age"],
         phoneNumber: json["phoneNumber"],
         email: json["email"],
+        photoUrl: json["photoUrl"],
+        uid: json["uid"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -46,5 +52,7 @@ class UsuarioModel {
         "age": age,
         "phoneNumber": phoneNumber,
         "email": email,
+        "photoUrl": photoUrl,
+        "uid": uid,
       };
 }

@@ -99,4 +99,23 @@ class UsuarioProvider {
       return {"ok": false, "mensaje": decodedData["error"]["message"]};
     }
   }
+
+  Future cargarUserChats(String uid) async {
+    List<String> data = [];
+    try {
+      await firestoreInstance
+          .collection("users")
+          .doc(_prefs.idUser)
+          .collection("chatting")
+          .get()
+          .then((value) {
+        value.docs.forEach((element) {
+          data.add(element.id);
+        });
+      });
+      return data;
+    } on FirebaseAuthException catch (e) {
+      return e.message;
+    }
+  }
 }
