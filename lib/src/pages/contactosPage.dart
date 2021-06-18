@@ -58,7 +58,7 @@ class _ContactoPageState extends State<ContactoPage> {
         children: <Widget>[
           HeaderWidget(
             size: size,
-            text: "Contactos \n \n Gestiona aquí tus",
+            text: "Gestiona aquí tus \n Contactos \n",
           ),
           _crearListado(bloc),
           SizedBox(

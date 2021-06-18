@@ -14,7 +14,7 @@ import 'package:simoric/src/pages/widgets/loading.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:simoric/src/provider/usuarioProvider.dart';
 
-import '../../const.dart';
+import '../../constants.dart';
 import '../../main.dart';
 import 'chatPage.dart';
 

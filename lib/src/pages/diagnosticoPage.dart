@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:simoric/src/bloc/login_bloc.dart';
 import 'package:simoric/src/models/registroModel.dart';
 import 'package:simoric/src/pages/constant.dart';
@@ -26,31 +27,100 @@ class _DiagnosticoPageState extends State<DiagnosticoPage> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size * 1.5;
+    Size size = MediaQuery.of(context).size;
 
     bloc.cargarRegistros();
 
     return SafeArea(
-      child: Scaffold(
-          appBar: buildAppbar(),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                HeaderWidget(size: size, text: "Diagnóstico"),
-                _crearListado(bloc),
-              ],
+        child: Scaffold(
+            appBar: buildAppbar(),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    HeaderWidget(size: size, text: "Diagnóstico"),
+                    Container(
+                      //width: 400,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        gradient: LinearGradient(colors: [
+                          Color.fromRGBO(200, 210, 200, 76),
+                          Color.fromRGBO(255, 255, 255, 63)
+                        ]),
+                      ),
+                      margin:
+                          EdgeInsets.only(left: 10.0, top: 1.0, bottom: 15.0),
+                      padding: EdgeInsets.all(30.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.person),
+                              SizedBox(
+                                width: 5.0,
+                              ),
+                              Text("Médico a cargo: Carlos Montes")
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.phone),
+                              SizedBox(
+                                width: 5.0,
+                              ),
+                              Text("3202262957")
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.mail),
+                              SizedBox(
+                                width: 5.0,
+                              ),
+                              Text("alpha@correo.com")
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        "Registros",
+                        style: TextStyle(
+                          fontSize: 30.0,
+                        ),
+                      ),
+                    ),
+                    _crearListado(bloc),
+                  ],
+                ),
+              ),
             ),
-          ),
-          drawer: Drawer(
-            child: MainDrawer(),
-          ),
-          floatingActionButton: FloatingActionButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, MedicionPage.routeName),
-              child: Icon(Icons.local_hospital),
-              backgroundColor: Colors.blueAccent)),
-    );
+            drawer: Drawer(
+              child: MainDrawer(),
+            ),
+            floatingActionButton: SpeedDial(
+              backgroundColor: Colors.green,
+              animatedIcon: AnimatedIcons.menu_close,
+              children: [
+                SpeedDialChild(
+                  child: Icon(Icons.add),
+                  label: "Agregar médico",
+                  onTap: () {},
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.local_hospital_rounded),
+                  backgroundColor: Colors.red[300],
+                  label: "Tomar medida",
+                  onTap: () =>
+                      Navigator.pushNamed(context, MedicionPage.routeName),
+                ),
+              ],
+            )));
   }
 
   AppBar buildAppbar() {

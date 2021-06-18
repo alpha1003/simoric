@@ -224,23 +224,90 @@ class MedicoPage extends StatelessWidget {
         return StatefulBuilder(
           builder: (BuildContext context, setState) {
             return AlertDialog(
-              content: Container(
-                width: 300.0,
-                height: 300.0,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text("Martín Burgos"),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                  ],
+              content: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  width: 400.0,
+                  height: 300.0,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text("Martín Burgos"),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      _crearTabla(),
+                    ],
+                  ),
                 ),
               ),
+              actions: [
+                FlatButton(
+                  child: Text("Aceptar"),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
             );
           },
         );
       },
+    );
+  }
+
+  Widget _crearTabla() {
+    return DataTable(
+      columns: const <DataColumn>[
+        DataColumn(
+          label: Text(
+            'Fecha',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'BPM',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Estado',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Alerta',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ],
+      rows: const <DataRow>[
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('23-5-21')),
+            DataCell(Text('85')),
+            DataCell(Text('Reposo')),
+            DataCell(Text('Normal')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('21-5-21')),
+            DataCell(Text('95')),
+            DataCell(Text('Reposo')),
+            DataCell(Text('Normal')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('19-5-21')),
+            DataCell(Text('84')),
+            DataCell(Text('Reposo')),
+            DataCell(Text('Normal')),
+          ],
+        ),
+      ],
     );
   }
 }

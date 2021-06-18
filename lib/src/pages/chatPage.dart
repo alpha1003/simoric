@@ -12,7 +12,7 @@ import 'package:simoric/src/pages/widgets/full_photo.dart';
 import 'package:simoric/src/pages/widgets/loading.dart';
 import 'package:simoric/src/preferencias_usuario/preferencias_usuario.dart';
 
-import '../../const.dart';
+import '../../constants.dart';
 
 class Chat extends StatelessWidget {
   final String peerId;
